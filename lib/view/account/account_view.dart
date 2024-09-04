@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/color_extenstion.dart';
 import '../../common_widget/your_review_row.dart';
+import 'package:book_grocer/view/account/edit_profile_view.dart';
 
 class AccountView extends StatefulWidget {
   const AccountView({super.key});
@@ -114,26 +115,34 @@ class _AccountViewState extends State<AccountView> {
                   Container(
                     height: 30.0,
                     decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: TColor.button),
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: TColor.primary,
-                            blurRadius: 2,
-                            offset: const Offset(0, 2),
-                          )
-                        ]),
+                      gradient: LinearGradient(colors: TColor.button),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: TColor.primary,
+                          blurRadius: 2,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => EditProfilePage()),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent),
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                      ),
                       child: const Text(
                         'Edit Profile',
                         style: TextStyle(fontSize: 12),
                       ),
                     ),
-                  )
+                  ),
+
                 ],
               ),
             ),

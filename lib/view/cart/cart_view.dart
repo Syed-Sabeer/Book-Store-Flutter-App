@@ -42,11 +42,19 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Cart"),
-        backgroundColor: TColor.primary,
+
+        title: Text(
+          "Cart",
+          style: TextStyle(
+            color: TColor.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: cartItems.isEmpty
-          ? Center(child: Text("Your cart is empty"))
+          ? const Center(child: Text("Your cart is empty"))
           : Column(
         children: [
           Expanded(
@@ -80,12 +88,12 @@ class _CartPageState extends State<CartPage> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text("Qty: ${item["quantity"]}"),
                             ],
                           ),
                           IconButton(
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.remove_shopping_cart,
                               color: Colors.red, // Change icon color to red
                             ),
@@ -112,14 +120,20 @@ class _CartPageState extends State<CartPage> {
               children: [
                 Text(
                   "Total: \$${getTotalPrice().toStringAsFixed(2)}",
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TColor.primary,
+                  ),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/checkout');
+                    // Submit review logic here
                   },
-                  child: Text("Checkout"),
+                  child: const Text(
+                    "Checkout",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),

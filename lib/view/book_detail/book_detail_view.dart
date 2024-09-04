@@ -58,7 +58,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
                 top: 5,
                 child: Container(
                   padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       color: Colors.red,
                       shape: BoxShape.circle
                   ),
@@ -94,8 +94,8 @@ class _BookSinglePageState extends State<BookSinglePage> {
                     color: Colors.black),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: const [
+              const Row(
+                children: [
                   Icon(Icons.star, color: Colors.yellow, size: 20),
                   Icon(Icons.star, color: Colors.yellow, size: 20),
                   Icon(Icons.star, color: Colors.yellow, size: 20),
@@ -183,25 +183,25 @@ class _BookSinglePageState extends State<BookSinglePage> {
               ),
               const SizedBox(height: 75),
 
-              Text(
+              const Text(
                 "Ratings & Reviews",
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black),
               ),
               const SizedBox(height: 10),
-              Column(
+              const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Display existing reviews here (hardcoded for demo)
-                  const ReviewTile(
+                  ReviewTile(
                     reviewerName: "John Doe",
                     rating: 4,
                     review: "Amazing book! Really enjoyed reading it.",
                   ),
-                  const SizedBox(height: 10),
-                  const ReviewTile(
+                  SizedBox(height: 10),
+                  ReviewTile(
                     reviewerName: "Jane Smith",
                     rating: 3,
                     review: "Good read, but could have been better.",
@@ -209,9 +209,9 @@ class _BookSinglePageState extends State<BookSinglePage> {
                 ],
               ),
               const SizedBox(height: 20),
-              Text(
+              const Text(
                 "Write Your Review",
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black),
@@ -238,10 +238,10 @@ class _BookSinglePageState extends State<BookSinglePage> {
               const SizedBox(height: 10),
               TextField(
                 controller: _reviewController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Write your review here...',
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
                 ),
                 maxLines: 4,
               ),

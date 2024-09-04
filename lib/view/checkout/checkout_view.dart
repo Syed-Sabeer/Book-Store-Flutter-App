@@ -31,7 +31,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Billing Details',
                       style: TextStyle(
                         fontSize: 20.0,
@@ -98,7 +98,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Shipping Address',
                       style: TextStyle(
                         fontSize: 20.0,
@@ -153,11 +153,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
 
             // Order Summary
-            Card(
-              margin: const EdgeInsets.only(bottom: 16.0),
+            const Card(
+              margin: EdgeInsets.only(bottom: 16.0),
               elevation: 5,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -168,7 +168,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                     ListTile(
                       title: Text('Item 1'),
                       trailing: Text('\$20.00'),
@@ -177,7 +177,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       title: Text('Item 2'),
                       trailing: Text('\$15.00'),
                     ),
-                    const Divider(),
+                    Divider(),
                     ListTile(
                       title: Text(
                         'Total',
@@ -208,7 +208,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Payment Method',
                       style: TextStyle(
                         fontSize: 20.0,
@@ -252,11 +252,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     // Navigate to confirmation page or any other page
                   }
                 },
-                child: const Text('Complete Purchase'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),
+                child: const Text('Complete Purchase'),
               ),
             ),
           ],

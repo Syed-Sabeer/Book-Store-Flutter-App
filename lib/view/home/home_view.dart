@@ -169,7 +169,7 @@ class _HomeViewState extends State<HomeView> {
                     AppBar(
                       backgroundColor: Colors.transparent,
                       elevation: 0,
-                      title: Row(children: const [
+                      title: const Row(children: [
                         Text(
                           "Our Top Picks",
                           style: TextStyle(
@@ -186,7 +186,8 @@ class _HomeViewState extends State<HomeView> {
 
                                 sideMenuScaffoldKey.currentState?.openEndDrawer();
 
-                            }, icon: const Icon(Icons.menu))
+                            }, icon: const Icon(Icons.menu, color: Colors.white,))
+
                       ],
                     ),
                     SizedBox(
@@ -259,7 +260,7 @@ class _HomeViewState extends State<HomeView> {
                       ]),
                     ),
                     SizedBox(
-                      height: media.width * 0.6,
+                      height: media.width * 0.7,
                       child: ListView.builder(
                           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
                           scrollDirection: Axis.horizontal,
