@@ -1,5 +1,6 @@
 import 'package:book_grocer/common/color_extenstion.dart';
 import 'package:book_grocer/view/login/forgot_password_view.dart';
+import 'package:book_grocer/view/login/sign_up_view.dart';  // Make sure to import SignUpView
 import 'package:flutter/material.dart';
 
 import '../../common_widget/round_button.dart';
@@ -52,13 +53,6 @@ class _SignInViewState extends State<SignInView> {
                 height: 15,
               ),
               RoundTextField(
-                controller: txtCode,
-                hintText: "Optional Group Special Code",
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              RoundTextField(
                 controller: txtEmail,
                 hintText: "Email Address",
               ),
@@ -75,30 +69,10 @@ class _SignInViewState extends State<SignInView> {
               ),
               Row(
                 children: [
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isStay = !isStay;
-                      });
-                    },
-                    icon: Icon(
-                      isStay ? Icons.check_box : Icons.check_box_outline_blank,
-                      color: isStay
-                          ? TColor.primary
-                          : TColor.subTitle.withOpacity(0.3),
-                    ),
-                  ),
-                  Text(
-                    "Stay Logged In",
-                    style: TextStyle(
-                      color: TColor.subTitle.withOpacity(0.3),
-                      fontSize: 15,
-                    ),
-                  ),
                   const Spacer(),
                   TextButton(
                     onPressed: () {
-                       Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordView()  ) );
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordView()));
                     },
                     child: Text(
                       "Forgot Your Password?",
@@ -107,7 +81,7 @@ class _SignInViewState extends State<SignInView> {
                         fontSize: 15,
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
               const SizedBox(
@@ -116,7 +90,24 @@ class _SignInViewState extends State<SignInView> {
               RoundLineButton(
                 title: "Sign In",
                 onPressed: () {},
-              )
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpView()));
+                  },
+                  child: Text(
+                    "Don't have an account? Register",
+                    style: TextStyle(
+                      color: TColor.primary,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

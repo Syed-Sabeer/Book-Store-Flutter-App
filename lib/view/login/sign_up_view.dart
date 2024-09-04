@@ -1,3 +1,4 @@
+import 'package:book_grocer/view/login/sign_in_view.dart';  // Import SignInView
 import 'package:book_grocer/view/login/help_us_view.dart';
 import 'package:flutter/material.dart';
 
@@ -44,7 +45,7 @@ class _SignUpViewState extends State<SignUpView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Sign up",
+                "Sign Up",
                 style: TextStyle(
                     color: TColor.text,
                     fontSize: 24,
@@ -61,11 +62,9 @@ class _SignUpViewState extends State<SignUpView> {
                 height: 15,
               ),
               RoundTextField(
-                  controller: txtEmail,
-                  hintText: "Email Address",
-                  keyboardType: TextInputType.emailAddress),
-              const SizedBox(
-                height: 15,
+                controller: txtEmail,
+                hintText: "Email Address",
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(
                 height: 15,
@@ -79,13 +78,6 @@ class _SignUpViewState extends State<SignUpView> {
                 height: 15,
               ),
               RoundTextField(
-                controller: txtCode,
-                hintText: "Group Special Code (optional)",
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              RoundTextField(
                 controller: txtPassword,
                 hintText: "Password",
                 obscureText: true,
@@ -93,41 +85,33 @@ class _SignUpViewState extends State<SignUpView> {
               const SizedBox(
                 height: 15,
               ),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isStay = !isStay;
-                      });
-                    },
-                    icon: Icon(
-                      isStay ? Icons.check_box : Icons.check_box_outline_blank,
-                      color: isStay
-                          ? TColor.primary
-                          : TColor.subTitle.withOpacity(0.3),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      "Please sign me up for the monthly newsletter.",
-                      style: TextStyle(
-                        color: TColor.subTitle.withOpacity(0.3),
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 8,
-              ),
               RoundLineButton(
                 title: "Sign Up",
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder:  (context) => const HelpUsView()  ));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const HelpUsView()));
                 },
-              )
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const SignInView()));
+                  },
+                  child: Text(
+                    "Already have an account? Login",
+                    style: TextStyle(
+                      color: TColor.primary,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

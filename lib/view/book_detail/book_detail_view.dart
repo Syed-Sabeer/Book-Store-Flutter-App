@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:book_grocer/common/color_extenstion.dart';
 
 class BookSinglePage extends StatefulWidget {
   final Map<String, dynamic> bookData;
@@ -11,6 +12,8 @@ class BookSinglePage extends StatefulWidget {
 
 class _BookSinglePageState extends State<BookSinglePage> {
   int _quantity = 1; // Initial quantity
+  double _userRating = 0; // User's rating
+  final _reviewController = TextEditingController(); // Controller for review input
 
   void _incrementQuantity() {
     setState(() {
@@ -33,7 +36,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: TColor.primary,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black),
@@ -167,7 +170,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    backgroundColor: Colors.black,
+                    backgroundColor: TColor.primary,
                   ),
                   onPressed: () {
                     // Add to cart logic here
@@ -178,9 +181,162 @@ class _BookSinglePageState extends State<BookSinglePage> {
                   ),
                 ),
               ),
+              const SizedBox(height: 75),
+
+              Text(
+                "Ratings & Reviews",
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+              const SizedBox(height: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Display existing reviews here (hardcoded for demo)
+                  const ReviewTile(
+                    reviewerName: "John Doe",
+                    rating: 4,
+                    review: "Amazing book! Really enjoyed reading it.",
+                  ),
+                  const SizedBox(height: 10),
+                  const ReviewTile(
+                    reviewerName: "Jane Smith",
+                    rating: 3,
+                    review: "Good read, but could have been better.",
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Write Your Review",
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  for (int i = 1; i <= 5; i++)
+                    IconButton(
+                      icon: Icon(
+                        i <= _userRating
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: Colors.yellow,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _userRating = i.toDouble();
+                        });
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _reviewController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Write your review here...',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                ),
+                maxLines: 4,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: TColor.primary,
+                ),
+                onPressed: () {
+                  // Submit review logic here
+                },
+                child: const Text(
+                  "Submit Review",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class ReviewTile extends StatefulWidget {
+  final String reviewerName;
+  final int rating;
+  final String review;
+
+  const ReviewTile({
+    super.key,
+    required this.reviewerName,
+    required this.rating,
+    required this.review,
+  });
+
+  @override
+  _ReviewTileState createState() => _ReviewTileState();
+}
+
+class _ReviewTileState extends State<ReviewTile> {
+  bool _liked = false; // Track if review is liked
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.reviewerName,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    for (int i = 1; i <= 5; i++)
+                      Icon(
+                        i <= widget.rating
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: Colors.yellow,
+                        size: 20,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  widget.review,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              _liked ? Icons.favorite : Icons.favorite_border,
+              color: _liked ? Colors.red : Colors.grey,
+              size: 24,
+            ),
+            onPressed: () {
+              setState(() {
+                _liked = !_liked;
+              });
+            },
+          ),
+        ],
       ),
     );
   }

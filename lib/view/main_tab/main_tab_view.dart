@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../account/account_view.dart';
 import '../home/home_view.dart';
+import '../login/sign_in_view.dart';
 import '../our_book/out_books_view.dart';
 import '../search/search_view.dart';
-import '../cart/cart_page.dart'; // Import the CartPage
-import '../wishlist/WishlistPage.dart'; // Import the WishlistPage
+import '../cart/cart_view.dart'; // Import the CartPage
+import '../wishlist/wishlist_view.dart'; // Import the WishlistPage
 
 class MainTabView extends StatefulWidget {
   const MainTabView({super.key});
@@ -25,18 +26,14 @@ class _MainTabViewState extends State<MainTabView>
 
   List menuArr = [
     {"name": "Home", "icon": Icons.home},
-    {"name": "Our Books", "icon": Icons.book},
-    {"name": "Our Stores", "icon": Icons.storefront},
-    {"name": "Careers", "icon": Icons.business_center},
-    {"name": "Sell With Us", "icon": Icons.attach_money},
-    {"name": "Newsletter", "icon": Icons.newspaper},
-    {"name": "Pop-up Leasing", "icon": Icons.open_in_new},
-    {"name": "Account", "icon": Icons.account_circle}
+    {"name": "Account", "icon": Icons.account_circle},
+    {"name": "Login/Register", "icon": Icons.account_circle}
   ];
 
   @override
   void initState() {
     controller = TabController(length: 4, vsync: this);
+    // TODO: implement initState
     super.initState();
   }
 
@@ -70,29 +67,50 @@ class _MainTabViewState extends State<MainTabView>
                     children: menuArr.map((mObj) {
                       var index = menuArr.indexOf(mObj);
                       return Container(
+                        // margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 15),
                         padding: const EdgeInsets.symmetric(
                             vertical: 12, horizontal: 15),
                         decoration: selectMenu == index
                             ? BoxDecoration(color: TColor.primary, boxShadow: [
-                          BoxShadow(
-                              color: TColor.primary,
-                              blurRadius: 10,
-                              offset: const Offset(0, 3))
-                        ])
+                                BoxShadow(
+                                    color: TColor.primary,
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3))
+                              ])
                             : null,
                         child: GestureDetector(
                           onTap: () {
+
+                            if(index == 9) {
+
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => const OurBooksView()  ) );
+                                sideMenuScaffoldKey.currentState?.closeEndDrawer();
+
+                            }else if (index == 1) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AccountView()));
+                              sideMenuScaffoldKey.currentState
+                                  ?.closeEndDrawer();
+                            }
+                            else if (index == 2) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                      const SignInView()));
+                              sideMenuScaffoldKey.currentState
+                                  ?.closeEndDrawer();
+                            }
+
+
+                            //
+
                             setState(() {
                               selectMenu = index;
                             });
-                            sideMenuScaffoldKey.currentState?.closeEndDrawer();
-
-                            if (index == 1) {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => const OurBooksView()));
-                            } else if (index == 7) {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountView()));
-                            }
-                            // Handle other menu options here if needed
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -123,7 +141,7 @@ class _MainTabViewState extends State<MainTabView>
                     }).toList()),
                 Container(
                   margin:
-                  const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -140,7 +158,7 @@ class _MainTabViewState extends State<MainTabView>
                       TextButton(
                         onPressed: () {},
                         child: Text(
-                          "Terms",
+                          "Terns",
                           style: TextStyle(
                               color: TColor.subTitle,
                               fontSize: 17,
@@ -171,8 +189,10 @@ class _MainTabViewState extends State<MainTabView>
       body: TabBarView(controller: controller, children: [
         const HomeView(),
         const SearchView(),
-        const WishlistPage(), // Updated to WishlistPage
-        const CartPage(), // Updated to CartPage
+        const WishlistPage(),
+        const CartPage(),
+        Container(),
+        Container(),
       ]),
       bottomNavigationBar: BottomAppBar(
         color: TColor.primary,

@@ -1,3 +1,4 @@
+import 'package:book_grocer/common/color_extenstion.dart';
 import 'package:flutter/material.dart';
 
 class CartPage extends StatefulWidget {
@@ -33,16 +34,16 @@ class _CartPageState extends State<CartPage> {
   ];
 
   double getTotalPrice() {
-    return cartItems.fold(0, (total, item) => total + (item["price"] * item["quantity"]));
+    return cartItems.fold(
+        0, (total, item) => total + (item["price"] * item["quantity"]));
   }
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: Text("Cart"),
-        backgroundColor: Colors.teal,
+        backgroundColor: TColor.primary,
       ),
       body: cartItems.isEmpty
           ? Center(child: Text("Your cart is empty"))
@@ -65,20 +66,39 @@ class _CartPageState extends State<CartPage> {
                     ),
                     title: Text(item["name"].toString()),
                     subtitle: Text("by ${item["author"]}"),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("\$${item["price"].toStringAsFixed(2)}"),
-                        Text("Qty: ${item["quantity"]}"),
-                        IconButton(
-                          icon: Icon(Icons.remove_shopping_cart),
-                          onPressed: () {
-                            setState(() {
-                              cartItems.removeAt(index);
-                            });
-                          },
-                        ),
-                      ],
+                    trailing: Flexible(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "\$${item["price"].toStringAsFixed(2)}",
+                                style: TextStyle(
+                                  color: TColor.money,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text("Qty: ${item["quantity"]}"),
+                            ],
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.remove_shopping_cart,
+                              color: Colors.red, // Change icon color to red
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                cartItems.removeAt(index);
+                              });
+                            },
+                          ),
+
+
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -92,11 +112,12 @@ class _CartPageState extends State<CartPage> {
               children: [
                 Text(
                   "Total: \$${getTotalPrice().toStringAsFixed(2)}",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/checkout'); // Navigate to CheckoutPage
+                    Navigator.pushNamed(context, '/checkout');
                   },
                   child: Text("Checkout"),
                 ),

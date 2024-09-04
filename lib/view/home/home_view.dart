@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
-import 'package:book_grocer/view/book_view/BookSinglePage.dart'; // Import BookSinglePage
+import 'package:book_grocer/view/book_detail/book_detail_view.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/material.dart';
 
 import '../../common_widget/best_seller_cell.dart';
 import '../../common_widget/genres_cell.dart';
@@ -9,8 +9,8 @@ import '../../common_widget/recently_cell.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
 import '../../common_widget/top_picks_cell.dart';
-
 import '../login/sign_up_view.dart';
+import '../main_tab/main_tab_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -20,6 +20,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+
   TextEditingController txtName = TextEditingController();
   TextEditingController txtEmail = TextEditingController();
 
@@ -102,7 +103,7 @@ class _HomeViewState extends State<HomeView> {
     }
   ];
 
-  List<Map<String, dynamic>> recentArr = [
+  List<Map<String, dynamic>> newArr = [
     {
       "name": "The Fatal Tree",
       "author": "by Jake Arnott",
@@ -153,7 +154,8 @@ class _HomeViewState extends State<HomeView> {
                       height: media.width,
                       decoration: BoxDecoration(
                           color: TColor.primary,
-                          borderRadius: BorderRadius.circular(media.width * 0.5)),
+                          borderRadius:
+                              BorderRadius.circular(media.width * 0.5)),
                     ),
                   ),
                 ),
@@ -181,10 +183,10 @@ class _HomeViewState extends State<HomeView> {
                       actions: [
                         IconButton(
                             onPressed: () {
-                              // Replace this with your actual side menu logic
-                              // sideMenuScaffoldKey.currentState?.openEndDrawer();
-                            },
-                            icon: const Icon(Icons.menu))
+
+                                sideMenuScaffoldKey.currentState?.openEndDrawer();
+
+                            }, icon: const Icon(Icons.menu))
                       ],
                     ),
                     SizedBox(
@@ -192,20 +194,11 @@ class _HomeViewState extends State<HomeView> {
                       height: media.width * 0.8,
                       child: CarouselSlider.builder(
                         itemCount: topPicksArr.length,
-                        itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
-                          var iObj = topPicksArr[itemIndex];
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => BookSinglePage(bookData: iObj),
-                                ),
-                              );
-                            },
-                            child: TopPicksCell(
-                              iObj: iObj,
-                            ),
+                        itemBuilder: (BuildContext context, int itemIndex,
+                            int pageViewIndex) {
+                          var iObj = topPicksArr[itemIndex] as Map? ?? {};
+                          return TopPicksCell(
+                            iObj: iObj,
                           );
                         },
                         options: CarouselOptions(
@@ -298,7 +291,7 @@ class _HomeViewState extends State<HomeView> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(children: [
                         Text(
-                          "Recently Viewed",
+                          "New Arrival",
                           style: TextStyle(
                               color: TColor.text,
                               fontSize: 22,
@@ -307,13 +300,13 @@ class _HomeViewState extends State<HomeView> {
                       ]),
                     ),
                     SizedBox(
-                      height: media.width * 0.7,
+                      height: media.width * 0.9,
                       child: ListView.builder(
                           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
                           scrollDirection: Axis.horizontal,
-                          itemCount: recentArr.length,
+                          itemCount: newArr.length,
                           itemBuilder: ((context, index) {
-                            var bObj = recentArr[index];
+                            var bObj = newArr[index];
                             return GestureDetector(
                               onTap: () {
                                 Navigator.push(
@@ -344,10 +337,13 @@ class _HomeViewState extends State<HomeView> {
                         )
                       ]),
                     ),
+
                     Container(
                       width: double.maxFinite,
-                      margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 20, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 15),
                       decoration: BoxDecoration(
                           color: TColor.textbox.withOpacity(0.4),
                           borderRadius: BorderRadius.circular(15)),
@@ -361,42 +357,52 @@ class _HomeViewState extends State<HomeView> {
                                 fontSize: 12,
                               ),
                             ),
+
+                             const SizedBox(
+                              height: 15,
+                            ),
+
+                             RoundTextField(
+                              controller: txtName,
+                              hintText: "Name",
+                            ),
                             const SizedBox(
                               height: 15,
                             ),
                             RoundTextField(
-                                controller: txtName,
-                                hintText: "Your name",
-                                img: "assets/img/user.png"),
-                            const SizedBox(
-                              height: 12,
+                              controller: txtEmail,
+                              hintText: "Email Address",
                             ),
-                            RoundTextField(
-                                controller: txtEmail,
-                                hintText: "Your email address",
-                                img: "assets/img/email.png"),
+
                             const SizedBox(
                               height: 15,
                             ),
-                            RoundButton(
-                              title: "Sign Up",
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                        const SignUpView()));
-                              },
-                            )
+
+                            Row(mainAxisAlignment: MainAxisAlignment.end,children: [
+                              MiniRoundButton(title: "Sign Up", onPressed:
+                              (){
+                                 Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const SignUpView()));
+                              }, )
+                            ],)
+
+
                           ]),
                     ),
-                    SizedBox(
-                      height: media.width * 0.05,
+
+
+
+                     SizedBox(
+                      height: media.width * 0.1,
                     ),
+
                   ],
                 )
               ],
-            ),
+            )
           ],
         ),
       ),
