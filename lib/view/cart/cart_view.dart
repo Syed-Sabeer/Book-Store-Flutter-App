@@ -1,4 +1,5 @@
 import 'package:book_grocer/common/color_extenstion.dart';
+import 'package:book_grocer/view/checkout/checkout_view.dart';
 import 'package:flutter/material.dart';
 
 class CartPage extends StatefulWidget {
@@ -121,14 +122,27 @@ class _CartPageState extends State<CartPage> {
                 Text(
                   "Total: \$${getTotalPrice().toStringAsFixed(2)}",
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: TColor.primary,
+                    backgroundColor: TColor.primary, // Your primary color defined in TColor
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20), // Added padding for better appearance
+                    textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), // Text styling for the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8), // Rounded corners for the button
+                    ),
                   ),
                   onPressed: () {
-                    // Submit review logic here
+                    // Navigate to the CheckoutPage when the button is pressed
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CheckoutPage(), // CheckoutPage navigation
+                      ),
+                    );
                   },
                   child: const Text(
                     "Checkout",
@@ -137,7 +151,8 @@ class _CartPageState extends State<CartPage> {
                 ),
               ],
             ),
-          ),
+          )
+
         ],
       ),
     );

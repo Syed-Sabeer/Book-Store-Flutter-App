@@ -23,7 +23,7 @@ class _AccountViewState extends State<AccountView> {
       "rate": 5.0
     },
     {
-    
+
       "img": "assets/img/p2.jpg",
       "description":
           "#1 international bestseller and award winning history book.",
@@ -225,8 +225,8 @@ class _AccountViewState extends State<AccountView> {
                       var isLast = purArr.last == iName;
                       return Container(
                         margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
-                        
-                       
+
+
                         padding: isFirst
                             ? const EdgeInsets.only(left: 25)
                             : (isLast
@@ -234,7 +234,7 @@ class _AccountViewState extends State<AccountView> {
                                 : null),
                         child: Container(
                         margin: const EdgeInsets.symmetric(vertical: 2),
-                        
+
                         decoration:  BoxDecoration(
                             borderRadius:  BorderRadius.circular(15),
                             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 2, offset: Offset(0, 1))]
