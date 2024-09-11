@@ -1,9 +1,15 @@
 import 'package:book_grocer/common/color_extenstion.dart';
 import 'package:book_grocer/view/main_tab/main_tab_view.dart';
+import 'package:book_grocer/admin/admin panel/admin_panel_view.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async{
   runApp(const MyApp());
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.android
+  );
 }
 
 class MyApp extends StatelessWidget {

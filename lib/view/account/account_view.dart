@@ -129,7 +129,7 @@ class _AccountViewState extends State<AccountView> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => EditProfilePage()),
+                          MaterialPageRoute(builder: (context) => const EditProfilePage()),
                         );
                       },
                       style: ElevatedButton.styleFrom(

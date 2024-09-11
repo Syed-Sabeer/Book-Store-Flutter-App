@@ -76,7 +76,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
                               blurRadius: 10,
-                              offset: Offset(0, 5),
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
@@ -105,45 +105,45 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 color: Colors.black.withOpacity(0.3),
                                 spreadRadius: 2,
                                 blurRadius: 6,
-                                offset: Offset(0, 4),
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-                          child: Icon(Icons.camera_alt, color: Colors.white, size: 28),
+                          child: const Icon(Icons.camera_alt, color: Colors.white, size: 28),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               _buildTextFormField(_nameController, 'Name', Icons.person),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildTextFormField(_cityController, 'City', Icons.location_city),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildTextFormField(_countryController, 'Country', Icons.public),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildTextFormField(_bioController, 'Bio', Icons.info, maxLines: 4),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     // Handle form submission
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Profile updated')),
+                      const SnackBar(content: Text('Profile updated')),
                     );
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 5,
                 ),
-                child: Text('Save', style: TextStyle(
+                child: const Text('Save', style: TextStyle(
                   color: Colors.white
 
                 ),
@@ -158,7 +158,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget _buildTextFormField(TextEditingController controller, String labelText, IconData icon, {int? maxLines}) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8.0),
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
@@ -177,7 +177,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey[300]!, width: 1.0),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           filled: true,
           fillColor: Colors.grey[100],
         ),

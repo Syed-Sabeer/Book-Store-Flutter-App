@@ -1,7 +1,6 @@
+import 'package:book_grocer/firebaseauth.dart';
 import 'package:book_grocer/view/login/sign_in_view.dart';  // Import SignInView
-import 'package:book_grocer/view/login/help_us_view.dart';
 import 'package:flutter/material.dart';
-
 import '../../common/color_extenstion.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
@@ -17,12 +16,13 @@ class _SignUpViewState extends State<SignUpView> {
   TextEditingController txtFirstName = TextEditingController();
   TextEditingController txtEmail = TextEditingController();
   TextEditingController txtMobile = TextEditingController();
-  TextEditingController txtCode = TextEditingController();
   TextEditingController txtPassword = TextEditingController();
   bool isStay = false;
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController emailcon = TextEditingController();
+    TextEditingController passwordcon = TextEditingController();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -51,57 +51,45 @@ class _SignUpViewState extends State<SignUpView> {
                     fontSize: 24,
                     fontWeight: FontWeight.w700),
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               RoundTextField(
                 controller: txtFirstName,
                 hintText: "First & Last Name",
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               RoundTextField(
-                controller: txtEmail,
+                controller: emailcon,
                 hintText: "Email Address",
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               RoundTextField(
                 controller: txtMobile,
                 hintText: "Mobile Phone",
                 keyboardType: TextInputType.phone,
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               RoundTextField(
-                controller: txtPassword,
+                controller: passwordcon,
                 hintText: "Password",
                 obscureText: true,
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               RoundLineButton(
                 title: "Sign Up",
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HelpUsView()));
+                  createUserWithEmailAndPassword(
+                    emailcon.text,
+                    passwordcon.text,
+                    context,
+                  );
                 },
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               Center(
                 child: TextButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const SignInView()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SignInView()));
                   },
                   child: Text(
                     "Already have an account? Login",

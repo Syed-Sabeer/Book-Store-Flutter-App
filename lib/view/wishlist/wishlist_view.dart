@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
-import 'package:book_grocer/main.dart'; // Import your HomeView
+// Import your HomeView
 
 class WishlistPage extends StatefulWidget {
   const WishlistPage({super.key});

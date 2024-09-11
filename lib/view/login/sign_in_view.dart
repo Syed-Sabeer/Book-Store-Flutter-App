@@ -1,8 +1,8 @@
-import 'package:book_grocer/common/color_extenstion.dart';
+import 'package:book_grocer/firebaseauth.dart'; // Import Firebase Auth functions
 import 'package:book_grocer/view/login/forgot_password_view.dart';
-import 'package:book_grocer/view/login/sign_up_view.dart';  // Make sure to import SignUpView
+import 'package:book_grocer/view/login/sign_up_view.dart';  // Import SignUpView
 import 'package:flutter/material.dart';
-
+import '../../common/color_extenstion.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
 
@@ -14,7 +14,6 @@ class SignInView extends StatefulWidget {
 }
 
 class _SignInViewState extends State<SignInView> {
-  TextEditingController txtCode = TextEditingController();
   TextEditingController txtEmail = TextEditingController();
   TextEditingController txtPassword = TextEditingController();
   bool isStay = false;
@@ -49,30 +48,27 @@ class _SignInViewState extends State<SignInView> {
                     fontSize: 24,
                     fontWeight: FontWeight.w700),
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               RoundTextField(
                 controller: txtEmail,
                 hintText: "Email Address",
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               RoundTextField(
                 controller: txtPassword,
                 hintText: "Password",
                 obscureText: true,
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               Row(
                 children: [
                   const Spacer(),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordView()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ForgotPasswordView()),
+                      );
                     },
                     child: Text(
                       "Forgot Your Password?",
@@ -84,20 +80,25 @@ class _SignInViewState extends State<SignInView> {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 8,
-              ),
+              const SizedBox(height: 8),
               RoundLineButton(
                 title: "Sign In",
-                onPressed: () {},
+                onPressed: () {
+                  signInWithEmailAndPassword(
+                    txtEmail.text,
+                    txtPassword.text,
+                    context,
+                  );
+                },
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               Center(
                 child: TextButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpView()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SignUpView()),
+                    );
                   },
                   child: Text(
                     "Don't have an account? Register",

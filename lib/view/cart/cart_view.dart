@@ -129,8 +129,8 @@ class _CartPageState extends State<CartPage> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: TColor.primary, // Your primary color defined in TColor
-                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20), // Added padding for better appearance
-                    textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), // Text styling for the button
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20), // Added padding for better appearance
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold), // Text styling for the button
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8), // Rounded corners for the button
                     ),
@@ -140,7 +140,7 @@ class _CartPageState extends State<CartPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CheckoutPage(), // CheckoutPage navigation
+                        builder: (context) => const CheckoutPage(), // CheckoutPage navigation
                       ),
                     );
                   },

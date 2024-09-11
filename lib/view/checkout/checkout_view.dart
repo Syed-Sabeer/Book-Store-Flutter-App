@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../common/color_extenstion.dart';
 
 class CheckoutPage extends StatefulWidget {
+  const CheckoutPage({super.key});
+
   @override
   _CheckoutPageState createState() => _CheckoutPageState();
 }
@@ -76,24 +78,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Cart Items Section
-            Text(
+            const Text(
               'Checkout',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ListView.builder(
               shrinkWrap: true,
               itemCount: cartItems.length,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
                 final item = cartItems[index];
                 return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -103,22 +105,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       borderRadius: BorderRadius.circular(10),
                       child: Image.asset(item['image'], width: 50, height: 50, fit: BoxFit.cover),
                     ),
-                    title: Text(item['name'], style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text('Quantity: ${item['quantity']}'),
                     trailing: Text('\$${(item['price'] * item['quantity']).toStringAsFixed(2)}',
-                        style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
                   ),
                 );
               },
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Delivery Detail Section
-            Text(
+            const Text(
               'Delivery Details',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Form(
               key: _formKey,
               child: Column(
@@ -128,13 +130,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     labelText: 'Address',
                     icon: Icons.location_on,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _buildTextFormField(
                     controller: _cityController,
                     labelText: 'City',
                     icon: Icons.location_city,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _buildTextFormField(
                     controller: _postalCodeController,
                     labelText: 'Postal Code',
@@ -143,14 +145,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Payment Section
-            Text(
+            const Text(
               'Payment Method',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Column(
               children: [
                 ListTile(
@@ -163,7 +165,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       });
                     },
                   ),
-                  title: Text('Credit Card'),
+                  title: const Text('Credit Card'),
                 ),
                 ListTile(
                   leading: Radio<String>(
@@ -175,7 +177,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       });
                     },
                   ),
-                  title: Text('PayPal'),
+                  title: const Text('PayPal'),
                 ),
                 ListTile(
                   leading: Radio<String>(
@@ -187,11 +189,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       });
                     },
                   ),
-                  title: Text('Cash on Delivery'),
+                  title: const Text('Cash on Delivery'),
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Dynamic Payment Fields
             if (selectedPaymentMethod == 'Credit Card') ...[
@@ -200,13 +202,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 labelText: 'Card Number',
                 icon: Icons.credit_card,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _buildTextFormField(
                 controller: _cardHolderController,
                 labelText: 'Card Holder Name',
                 icon: Icons.person,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _buildTextFormField(
                 controller: _cardCVCController,
                 labelText: 'CVC',
@@ -220,30 +222,30 @@ class _CheckoutPageState extends State<CheckoutPage> {
               ),
             ],
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Order Summary Section
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
                 children: [
-                  Text(
+                  const Text(
                     'Order Summary',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildSummaryRow('Total Product Price', '\$${productTotal.toStringAsFixed(2)}'),
                   _buildSummaryRow('Shipping', '\$${shippingCost.toStringAsFixed(2)}'),
-                  Divider(thickness: 1, color: Colors.grey),
+                  const Divider(thickness: 1, color: Colors.grey),
                   _buildSummaryRow('Total Amount', '\$${finalTotal.toStringAsFixed(2)}', isBold: true),
                 ],
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
 
             // Proceed to Pay Button
             Center(
@@ -251,18 +253,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Order Placed Successfully')),
+                      const SnackBar(content: Text('Order Placed Successfully')),
                     );
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 80),
+                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 80),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                   backgroundColor: TColor.primary,
                 ),
-                child: Text('Proceed to Pay', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                child: const Text('Proceed to Pay', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ],
