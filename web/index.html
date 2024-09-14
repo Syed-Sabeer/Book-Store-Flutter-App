@@ -34,5 +34,21 @@
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+  <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-auth.js"></script>
+  <script>
+
+    var firebaseConfig = {
+       apiKey: 'AIzaSyA0oST2U1YjzYLZyS0GCyRcwnAVw5X1go8',
+    appId: '1:233683607681:android:94b46416f6d86550eb2d80',
+    messagingSenderId: '233683607681',
+    projectId: 'book-store-a2922',
+    storageBucket: 'book-store-a2922.appspot.com',
+
+    };
+
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
 </body>
 </html>

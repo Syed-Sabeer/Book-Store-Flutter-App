@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
 import 'package:flutter/material.dart';
 
@@ -21,25 +22,52 @@ GlobalKey<ScaffoldState> sideMenuScaffoldKey = GlobalKey<ScaffoldState>();
 class _MainTabViewState extends State<MainTabView>
     with TickerProviderStateMixin {
   TabController? controller;
-
   int selectMenu = 0;
-
-  List menuArr = [
-    {"name": "Home", "icon": Icons.home},
-    {"name": "Account", "icon": Icons.account_circle},
-    {"name": "Login/Register", "icon": Icons.account_circle}
-  ];
+  User? currentUser;
 
   @override
   void initState() {
     controller = TabController(length: 4, vsync: this);
-    // TODO: implement initState
     super.initState();
+    // Check login status on app start
+    currentUser = FirebaseAuth.instance.currentUser;
+  }
+
+  List<Map<String, dynamic>> getMenuItems() {
+    // Update the menu based on whether the user is logged in or not
+    if (currentUser != null) {
+      return [
+        {"name": "Home", "icon": Icons.home},
+        {"name": currentUser!.email ?? "Account", "icon": Icons.account_circle}, // Show email instead of Account
+        {"name": "Logout", "icon": Icons.logout}, // Show logout button
+      ];
+    } else {
+      return [
+        {"name": "Home", "icon": Icons.home},
+        {"name": "Account", "icon": Icons.account_circle},
+        {"name": "Login/Register", "icon": Icons.login}, // Show Login/Register
+      ];
+    }
+  }
+
+  // Function to handle logout
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    setState(() {
+      currentUser = null;
+    });
+    // Redirect to login page after logout
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const SignInView()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    List<Map<String, dynamic>> menuArr = getMenuItems();
+
     return Scaffold(
       key: sideMenuScaffoldKey,
       endDrawer: Drawer(
@@ -67,35 +95,37 @@ class _MainTabViewState extends State<MainTabView>
                     children: menuArr.map((mObj) {
                       var index = menuArr.indexOf(mObj);
                       return Container(
-                        // margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 15),
                         padding: const EdgeInsets.symmetric(
                             vertical: 12, horizontal: 15),
                         decoration: selectMenu == index
                             ? BoxDecoration(color: TColor.primary, boxShadow: [
-                                BoxShadow(
-                                    color: TColor.primary,
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 3))
-                              ])
+                          BoxShadow(
+                              color: TColor.primary,
+                              blurRadius: 10,
+                              offset: const Offset(0, 3))
+                        ])
                             : null,
                         child: GestureDetector(
                           onTap: () {
-
-                            if(index == 9) {
-
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => const OurBooksView()  ) );
-                                sideMenuScaffoldKey.currentState?.closeEndDrawer();
-
-                            }else if (index == 1) {
+                            if (index == 0) {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          const AccountView()));
+                                      const OurBooksView()));
                               sideMenuScaffoldKey.currentState
                                   ?.closeEndDrawer();
-                            }
-                            else if (index == 2) {
+                            } else if (index == 1 && currentUser != null) {
+                              // If logged in, show account
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                      const AccountView()));
+                              sideMenuScaffoldKey.currentState
+                                  ?.closeEndDrawer();
+                            } else if (index == 2 && currentUser == null) {
+                              // If not logged in, show Sign In/Register
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -103,10 +133,10 @@ class _MainTabViewState extends State<MainTabView>
                                       const SignInView()));
                               sideMenuScaffoldKey.currentState
                                   ?.closeEndDrawer();
+                            } else if (index == 2 && currentUser != null) {
+                              // If logged in, log out
+                              _logout();
                             }
-
-
-                            //
 
                             setState(() {
                               selectMenu = index;
@@ -141,7 +171,7 @@ class _MainTabViewState extends State<MainTabView>
                     }).toList()),
                 Container(
                   margin:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -158,7 +188,7 @@ class _MainTabViewState extends State<MainTabView>
                       TextButton(
                         onPressed: () {},
                         child: Text(
-                          "Terns",
+                          "Terms",
                           style: TextStyle(
                               color: TColor.subTitle,
                               fontSize: 17,
@@ -191,8 +221,6 @@ class _MainTabViewState extends State<MainTabView>
         const SearchView(),
         const WishlistPage(),
         const CartPage(),
-        Container(),
-        Container(),
       ]),
       bottomNavigationBar: BottomAppBar(
         color: TColor.primary,

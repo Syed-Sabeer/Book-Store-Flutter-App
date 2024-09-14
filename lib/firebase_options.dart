@@ -59,4 +59,5 @@ class DefaultFirebaseOptions {
     projectId: 'book-store-a2922',
     storageBucket: 'book-store-a2922.appspot.com',
   );
+
 }

@@ -3,6 +3,7 @@ import 'package:book_grocer/view/login/sign_in_view.dart';
 import 'package:book_grocer/view/main_tab/main_tab_view.dart';
 import 'package:flutter/material.dart';
 
+// Register a new user
 Future<void> createUserWithEmailAndPassword(String emailAddress, String password, BuildContext context) async {
   try {
     final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -29,6 +30,7 @@ Future<void> createUserWithEmailAndPassword(String emailAddress, String password
   }
 }
 
+// Sign in a user
 Future<void> signInWithEmailAndPassword(String emailAddress, String password, BuildContext context) async {
   try {
     final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -40,7 +42,7 @@ Future<void> signInWithEmailAndPassword(String emailAddress, String password, Bu
       // Navigate to home or other view after successful sign-in
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainTabView()), // Replace with your target view
+        MaterialPageRoute(builder: (context) => MainTabView()),
       );
     }
     print('Signed in: ${credential.user?.uid}');
@@ -52,5 +54,19 @@ Future<void> signInWithEmailAndPassword(String emailAddress, String password, Bu
     }
   } catch (e) {
     print('Error: $e');
+  }
+}
+
+// Sign out a user
+Future<void> signOut(BuildContext context) async {
+  try {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignInView()),
+    );
+    print('User signed out');
+  } catch (e) {
+    print('Error signing out: $e');
   }
 }

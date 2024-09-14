@@ -14,8 +14,8 @@ class SignInView extends StatefulWidget {
 }
 
 class _SignInViewState extends State<SignInView> {
-  TextEditingController txtEmail = TextEditingController();
-  TextEditingController txtPassword = TextEditingController();
+  final TextEditingController txtEmail = TextEditingController();
+  final TextEditingController txtPassword = TextEditingController();
   bool isStay = false;
 
   @override
@@ -44,9 +44,10 @@ class _SignInViewState extends State<SignInView> {
               Text(
                 "Sign In",
                 style: TextStyle(
-                    color: TColor.text,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700),
+                  color: TColor.text,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 15),
               RoundTextField(
@@ -83,12 +84,19 @@ class _SignInViewState extends State<SignInView> {
               const SizedBox(height: 8),
               RoundLineButton(
                 title: "Sign In",
-                onPressed: () {
-                  signInWithEmailAndPassword(
-                    txtEmail.text,
-                    txtPassword.text,
-                    context,
-                  );
+                onPressed: () async {
+                  try {
+                    await signInWithEmailAndPassword(
+                      txtEmail.text.trim(),
+                      txtPassword.text.trim(),
+                      context,
+                    );
+                  } catch (e) {
+                    // Handle error here, e.g., show a snackbar
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to sign in: $e')),
+                    );
+                  }
                 },
               ),
               const SizedBox(height: 15),

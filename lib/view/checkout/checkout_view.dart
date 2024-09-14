@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:book_grocer/view/login/sign_in_view.dart';
 import '../../common/color_extenstion.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -38,6 +40,28 @@ class _CheckoutPageState extends State<CheckoutPage> {
       "quantity": 1
     }
   ];
+
+  void checkLoginStatus() {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // User is not logged in, redirect to SignInView
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SignInView()),
+        );
+      });
+    }
+  }
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if the user is logged in when the page is loaded
+    checkLoginStatus();
+  }
 
   final double shippingCost = 50.0;
   String selectedPaymentMethod = 'Credit Card';

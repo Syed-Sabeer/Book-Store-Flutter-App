@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:book_grocer/view/login/sign_in_view.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
 // Import your HomeView
 
@@ -30,6 +32,27 @@ class _WishlistPageState extends State<WishlistPage> {
       "price": 10.99,
     }
   ];
+  void checkLoginStatus() {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // User is not logged in, redirect to SignInView
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SignInView()),
+        );
+      });
+    }
+  }
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if the user is logged in when the page is loaded
+    checkLoginStatus();
+  }
 
   @override
   Widget build(BuildContext context) {

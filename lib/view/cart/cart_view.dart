@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:book_grocer/view/login/sign_in_view.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
-import 'package:book_grocer/view/checkout/checkout_view.dart';
+ // Import SignInView
+import 'package:book_grocer/view/checkout/checkout_view.dart'; // Import CheckoutView
 import 'package:flutter/material.dart';
 
 class CartPage extends StatefulWidget {
@@ -34,16 +37,36 @@ class _CartPageState extends State<CartPage> {
     }
   ];
 
+  // Function to check if the user is logged in
+  void checkLoginStatus() {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // User is not logged in, redirect to SignInView
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SignInView()),
+        );
+      });
+    }
+  }
+
   double getTotalPrice() {
     return cartItems.fold(
         0, (total, item) => total + (item["price"] * item["quantity"]));
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Check if the user is logged in when the page is loaded
+    checkLoginStatus();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
         title: Text(
           "Cart",
           style: TextStyle(
@@ -80,7 +103,8 @@ class _CartPageState extends State<CartPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            crossAxisAlignment:
+                            CrossAxisAlignment.end,
                             children: [
                               Text(
                                 "\$${item["price"].toStringAsFixed(2)}",
@@ -96,7 +120,7 @@ class _CartPageState extends State<CartPage> {
                           IconButton(
                             icon: const Icon(
                               Icons.remove_shopping_cart,
-                              color: Colors.red, // Change icon color to red
+                              color: Colors.red,
                             ),
                             onPressed: () {
                               setState(() {
@@ -104,8 +128,6 @@ class _CartPageState extends State<CartPage> {
                               });
                             },
                           ),
-
-
                         ],
                       ),
                     ),
@@ -128,11 +150,13 @@ class _CartPageState extends State<CartPage> {
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: TColor.primary, // Your primary color defined in TColor
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20), // Added padding for better appearance
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold), // Text styling for the button
+                    backgroundColor: TColor.primary,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 20),
+                    textStyle: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8), // Rounded corners for the button
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   onPressed: () {
@@ -140,7 +164,8 @@ class _CartPageState extends State<CartPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const CheckoutPage(), // CheckoutPage navigation
+                        builder: (context) =>
+                        const CheckoutPage(), // CheckoutPage navigation
                       ),
                     );
                   },
@@ -151,8 +176,7 @@ class _CartPageState extends State<CartPage> {
                 ),
               ],
             ),
-          )
-
+          ),
         ],
       ),
     );
