@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
 
-class OrderViewPage extends StatelessWidget {
+class OrderCompletedViewPage extends StatelessWidget {
   final Map<String, dynamic> order;
 
-  const OrderViewPage({super.key, required this.order});
+  const OrderCompletedViewPage({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -141,52 +141,7 @@ class OrderViewPage extends StatelessWidget {
             ),
           ),
           // Action Buttons Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle cancel order action here
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Order cancelled')),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white, backgroundColor: Colors.red, // Text color
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Cancel Order',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle mark as shipped action here
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Order marked as shipped')),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white, backgroundColor: Colors.blue, // Text color
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Mark as Shipped',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-          ),
+
         ],
       ),
     );

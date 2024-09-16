@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:book_grocer/admin/list/book_list_view.dart';
 import 'package:book_grocer/admin/list/user_list_view.dart';
 import 'package:book_grocer/admin/list/order_list_view.dart';
+import 'package:book_grocer/admin/list/review_list_view.dart';
 import '../../common/color_extenstion.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -116,7 +117,12 @@ class DashboardPage extends StatelessWidget {
               leading: Icon(Icons.rate_review, color: TColor.primary),
               title: const Text('Reviews'),
               onTap: () {
-                Navigator.pushNamed(context, '/reviews'); // Ensure you have a route defined for this
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewsListPage(),
+                  ),
+                );
               },
             ),
             // Add more items as needed

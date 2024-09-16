@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
 
-class OrderViewPage extends StatelessWidget {
+class ShippedViewPage extends StatelessWidget {
   final Map<String, dynamic> order;
 
-  const OrderViewPage({super.key, required this.order});
+  const ShippedViewPage({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -169,18 +169,18 @@ class OrderViewPage extends StatelessWidget {
                   onPressed: () {
                     // Handle mark as shipped action here
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Order marked as shipped')),
+                      const SnackBar(content: Text('Order marked as delivered')),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white, backgroundColor: Colors.blue, // Text color
+                    foregroundColor: Colors.white, backgroundColor: TColor.primary, // Text color
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   child: const Text(
-                    'Mark as Shipped',
+                    'Mark as Delivered',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),

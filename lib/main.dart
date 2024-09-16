@@ -1,3 +1,4 @@
+import 'package:book_grocer/admin/dashboard/dashboard_view.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
 import 'package:book_grocer/view/main_tab/main_tab_view.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
         primaryColor: TColor.primary,
         fontFamily: 'SF Pro Text',
       ),
-      home: const MainTabView(),
+      home: const DashboardPage(),
     );
   }
 }

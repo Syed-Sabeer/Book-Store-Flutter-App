@@ -11,10 +11,8 @@ class UsersListPage extends StatefulWidget {
 }
 
 class _UsersListPageState extends State<UsersListPage> {
-  // Search query to filter users
   String _searchQuery = '';
 
-  // Sample user data
   final List<Map<String, dynamic>> _users = [
     {
       "id": "1",
@@ -28,8 +26,8 @@ class _UsersListPageState extends State<UsersListPage> {
       "orders": "15",
       "reviews": "3",
       "shippingAddress": "123 Main St, New York, NY 10001",
-      "ordersDetails": [], // Add default empty list
-      "reviewsDetails": [], // Add default empty list
+      "ordersDetails": [],
+      "reviewsDetails": [],
     },
     {
       "id": "2",
@@ -43,15 +41,13 @@ class _UsersListPageState extends State<UsersListPage> {
       "orders": "23",
       "reviews": "5",
       "shippingAddress": "456 Elm St, Los Angeles, CA 90001",
-      "ordersDetails": [], // Add default empty list
-      "reviewsDetails": [], // Add default empty list
+      "ordersDetails": [],
+      "reviewsDetails": [],
     },
-    // Add more users if needed
   ];
 
   @override
   Widget build(BuildContext context) {
-    // Filter the user list based on the search query
     final filteredUsers = _users.where((user) {
       return user['email']!.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
@@ -73,7 +69,6 @@ class _UsersListPageState extends State<UsersListPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Search field
             TextField(
               decoration: InputDecoration(
                 labelText: 'Search by email',
@@ -89,7 +84,6 @@ class _UsersListPageState extends State<UsersListPage> {
               },
             ),
             const SizedBox(height: 20),
-            // Display the filtered user list
             Expanded(
               child: ListView.builder(
                 itemCount: filteredUsers.length,
@@ -107,21 +101,17 @@ class _UsersListPageState extends State<UsersListPage> {
                         radius: 30,
                         backgroundColor: Colors.grey[200],
                       ),
-                      title: Text(user['email']),
-                      subtitle: Text('ID: ${user['id']}'),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.visibility, color: Colors.green),
-                        onPressed: () {
-                          // Navigate to the UserViewPage with user data
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UserViewPage(user: user),
-                            ),
-                          );
-                        },
-                      ),
+                      title: Text(user['name']),
+                      subtitle: Text('Email: ${user['email']}'),
                       contentPadding: const EdgeInsets.all(16.0),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UserViewPage(user: user),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
