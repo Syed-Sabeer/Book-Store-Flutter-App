@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart'; // To use kIsWeb
 import 'package:flutter/material.dart';
-import 'dart:io'; // Import this to use File
+import 'dart:io'; // Import this to use File for non-web platforms
 import 'package:image_picker/image_picker.dart'; // Import the image_picker package
 import '../../common/color_extenstion.dart';
 
@@ -20,7 +23,8 @@ class _AddItemPageState extends State<AddItemPage> {
   final TextEditingController _languageController = TextEditingController();
   final TextEditingController _lengthController = TextEditingController();
 
-  File? _image; // This will store the selected image
+  File? _image; // For non-web platforms
+  XFile? _webImage; // For web platforms
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -28,9 +32,54 @@ class _AddItemPageState extends State<AddItemPage> {
 
     if (pickedImage != null) {
       setState(() {
-        _image = File(pickedImage.path);
+        if (kIsWeb) {
+          _webImage = pickedImage; // For web
+        } else {
+          _image = File(pickedImage.path); // For non-web platforms
+        }
       });
     }
+  }
+
+  Future<void> uploadData() async {
+    String name = _nameController.text.toString();
+    int price = int.parse(_priceController.text);
+    String description = _descriptionController.text.toString();
+    String author = _authorController.text.toString();
+    String publisher = _publisherController.text.toString();
+    String language = _languageController.text.toString();
+    int length = int.parse(_lengthController.text);
+
+    String url;
+
+    // Handle image upload for both web and non-web platforms
+    if (kIsWeb && _webImage != null) {
+      UploadTask uploadTask = FirebaseStorage.instance
+          .ref("images/${DateTime.now()}")
+          .putData(await _webImage!.readAsBytes());
+      TaskSnapshot taskSnapshot = await uploadTask;
+      url = await taskSnapshot.ref.getDownloadURL();
+    } else if (_image != null) {
+      UploadTask uploadTask = FirebaseStorage.instance
+          .ref("images/${DateTime.now()}")
+          .putFile(_image!);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      url = await taskSnapshot.ref.getDownloadURL();
+    } else {
+      throw 'No image selected!';
+    }
+
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    await firestore.collection('books').add({
+      "name": name,
+      "price": price,
+      "description": description,
+      "author": author,
+      "publisher": publisher,
+      "language": language,
+      "length": length,
+      "imageurl": url,
+    });
   }
 
   @override
@@ -39,7 +88,7 @@ class _AddItemPageState extends State<AddItemPage> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context); // Navigate back to the previous page
+            Navigator.pop(context);
           },
           icon: Icon(
             Icons.arrow_back_ios,
@@ -96,7 +145,6 @@ class _AddItemPageState extends State<AddItemPage> {
               ),
               const SizedBox(height: 10),
 
-              // Image Picker Section
               const Text(
                 'Image',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -105,16 +153,23 @@ class _AddItemPageState extends State<AddItemPage> {
               Center(
                 child: GestureDetector(
                   onTap: _pickImage,
-                  child: _image != null
-                      ? Image.file(
+                  child: _image != null || _webImage != null
+                      ? kIsWeb
+                      ? Image.network(
+                    _webImage!.path,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  )
+                      : Image.file(
                     _image!,
-                    width: 100, // Adjust width
-                    height: 100, // Adjust height
+                    width: 100,
+                    height: 100,
                     fit: BoxFit.cover,
                   )
                       : Container(
-                    width: 100, // Adjust width
-                    height: 100, // Adjust height
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(10),
@@ -122,13 +177,12 @@ class _AddItemPageState extends State<AddItemPage> {
                     child: const Icon(
                       Icons.add_photo_alternate,
                       color: Colors.grey,
-                      size: 60, // Adjust icon size
+                      size: 60,
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
-
               _buildTextFormField(
                 controller: _publisherController,
                 labelText: 'Publisher',
@@ -149,16 +203,9 @@ class _AddItemPageState extends State<AddItemPage> {
               ),
               const SizedBox(height: 30),
 
-              // Submit Button
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Book Added Successfully')),
-                      );
-                    }
-                  },
+                  onPressed: uploadData,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 80),
                     shape: RoundedRectangleBorder(
@@ -167,7 +214,7 @@ class _AddItemPageState extends State<AddItemPage> {
                     backgroundColor: TColor.primary,
                   ),
                   child: const Text(
-                    'Add Book',
+                    'Add',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

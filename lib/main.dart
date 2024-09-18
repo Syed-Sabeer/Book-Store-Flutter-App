@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         primaryColor: TColor.primary,
         fontFamily: 'SF Pro Text',
       ),
-      home: const MainTabView(),
+      home: const DashboardPage(),
     );
   }
 }
