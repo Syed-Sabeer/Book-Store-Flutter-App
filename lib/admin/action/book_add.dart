@@ -22,6 +22,7 @@ class _AddItemPageState extends State<AddItemPage> {
   final TextEditingController _publisherController = TextEditingController();
   final TextEditingController _languageController = TextEditingController();
   final TextEditingController _lengthController = TextEditingController();
+  final TextEditingController _genreController = TextEditingController();
 
   File? _image; // For non-web platforms
   XFile? _webImage; // For web platforms
@@ -49,7 +50,7 @@ class _AddItemPageState extends State<AddItemPage> {
     String publisher = _publisherController.text.toString();
     String language = _languageController.text.toString();
     int length = int.parse(_lengthController.text);
-
+    String genre = _genreController.text.toString();
     String url;
 
     // Handle image upload for both web and non-web platforms
@@ -65,7 +66,7 @@ class _AddItemPageState extends State<AddItemPage> {
     }
 
     FirebaseFirestore firestore = FirebaseFirestore.instance;
-    await firestore.collection('book').add({
+    await firestore.collection('books').add({
       "name": name,
       "price": price,
       "description": description,
@@ -73,8 +74,12 @@ class _AddItemPageState extends State<AddItemPage> {
       "publisher": publisher,
       "language": language,
       "length": length,
+      "genre": genre,
       "imageurl": url,
+      "createdAt": FieldValue.serverTimestamp(),
+      "updatedAt": FieldValue.serverTimestamp(),
     });
+
   }
 
   @override
@@ -138,12 +143,39 @@ class _AddItemPageState extends State<AddItemPage> {
                 labelText: 'Author',
                 icon: Icons.person,
               ),
+              const SizedBox(height: 20),
+              _buildTextFormField(
+                controller: _publisherController,
+                labelText: 'Publisher',
+                icon: Icons.business,
+              ),
+              const SizedBox(height: 10),
+              _buildTextFormField(
+                controller: _languageController,
+                labelText: 'Language',
+                icon: Icons.language,
+              ),
+              const SizedBox(height: 10),
+              _buildTextFormField(
+                controller: _genreController,
+                labelText: 'genre',
+                icon: Icons.category,
+              ),
+              const SizedBox(height: 10),
+              _buildTextFormField(
+                controller: _lengthController,
+                labelText: 'Length (pages)',
+                icon: Icons.calendar_today,
+                keyboardType: TextInputType.number,
+              ),
+
               const SizedBox(height: 10),
 
               const Text(
                 'Image',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
+
               const SizedBox(height: 10),
               Center(
                 child: GestureDetector(
@@ -176,25 +208,6 @@ class _AddItemPageState extends State<AddItemPage> {
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              _buildTextFormField(
-                controller: _publisherController,
-                labelText: 'Publisher',
-                icon: Icons.business,
-              ),
-              const SizedBox(height: 10),
-              _buildTextFormField(
-                controller: _languageController,
-                labelText: 'Language',
-                icon: Icons.language,
-              ),
-              const SizedBox(height: 10),
-              _buildTextFormField(
-                controller: _lengthController,
-                labelText: 'Length (pages)',
-                icon: Icons.calendar_today,
-                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 30),
 

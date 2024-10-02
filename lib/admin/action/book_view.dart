@@ -17,12 +17,12 @@ class BookViewPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon:  Icon(Icons.arrow_back_ios, color: TColor.primary),
+          icon: Icon(Icons.arrow_back_ios, color: TColor.primary),
           onPressed: () {
             Navigator.pop(context); // Go back to the book list
           },
         ),
-        title:  Text(
+        title: Text(
           "Book Details",
           style: TextStyle(
             color: TColor.primary,
@@ -34,13 +34,15 @@ class BookViewPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.black),
             onPressed: () {
-              // Navigate to the edit book page
+              // Navigate to the edit book page with bookId and bookData
+              // In your book_view.dart or wherever you're navigating
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditBookPage(bookData: bookData),
+                  builder: (context) => EditBookPage(bookData: bookData), // bookData should contain all necessary info
                 ),
               );
+
             },
           ),
           IconButton(
@@ -148,35 +150,10 @@ class BookViewPage extends StatelessWidget {
               const SizedBox(height: 10),
 
               // Additional Book Information
-              _buildDetailRow("ID", bookData["id"] ?? 'No ID available'),
-              _buildDetailRow("Publisher", bookData["publisher"] ?? 'No publisher available'),
-              _buildDetailRow("Length", "${bookData["length"] ?? 'N/A'} pages"),
-              _buildDetailRow("Language", bookData["language"] ?? 'No language available'),
-
-              const SizedBox(height: 20),
-              const Divider(),
-              const SizedBox(height: 10),
-
-              // Description Section
-              const Text(
-                "Description",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                bookData["description"] ?? "No description available.",
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-              const Divider(),
+              _buildDetailRow("ID", bookData["id"]),
+              _buildDetailRow("Publisher", bookData["publisher"]),
+              _buildDetailRow("Language", bookData["language"]),
+              _buildDetailRow("Length", "${bookData["length"]} pages"),
             ],
           ),
         ),
@@ -184,27 +161,25 @@ class BookViewPage extends StatelessWidget {
     );
   }
 
-  // Helper method for building detail rows
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, dynamic value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "$label: ",
+            label,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
-              ),
+          Text(
+            value != null ? value.toString() : 'N/A',
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black,
             ),
           ),
         ],
@@ -212,42 +187,28 @@ class BookViewPage extends StatelessWidget {
     );
   }
 
-  // Show delete confirmation dialog
   void _showDeleteConfirmation(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Confirm Delete"),
-          content: const Text("Are you sure you want to delete this book?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                // Handle book deletion
-                _deleteBook(context);
-              },
-              child: const Text("Delete"),
-            ),
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Book"),
+        content: const Text("Are you sure you want to delete this book?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              // Handle the deletion
+              Navigator.pop(context);
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
     );
-  }
-
-  // Function to delete the book
-  void _deleteBook(BuildContext context) {
-    // Add your deletion logic here, such as making a network request to delete the book
-    // For example:
-    // await FirebaseFirestore.instance.collection('books').doc(bookData["id"]).delete();
-
-    // Assuming the deletion is successful, pop the current page and refresh the previous page
-    Navigator.of(context).pop(); // Close the book view page
-    Navigator.of(context).pop(); // Go back to the previous screen (book list)
   }
 }
