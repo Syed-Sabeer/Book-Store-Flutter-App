@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'dart:io'; // Import this to use File for non-web platforms
 import 'package:image_picker/image_picker.dart'; // Import the image_picker package
 import '../../common/color_extenstion.dart';
+import 'package:book_grocer/admin/list/book_list_view.dart';
 
 class AddItemPage extends StatefulWidget {
   const AddItemPage({super.key});
@@ -43,44 +44,57 @@ class _AddItemPageState extends State<AddItemPage> {
   }
 
   Future<void> uploadData() async {
-    String name = _nameController.text.toString();
-    int price = int.parse(_priceController.text);
-    String description = _descriptionController.text.toString();
-    String author = _authorController.text.toString();
-    String publisher = _publisherController.text.toString();
-    String language = _languageController.text.toString();
-    int length = int.parse(_lengthController.text);
-    String genre = _genreController.text.toString();
-    String url;
+    if (_formKey.currentState!.validate()) {
+      try {
+        String name = _nameController.text.toString();
+        int price = int.parse(_priceController.text);
+        String description = _descriptionController.text.toString();
+        String author = _authorController.text.toString();
+        String publisher = _publisherController.text.toString();
+        String language = _languageController.text.toString();
+        int length = int.parse(_lengthController.text);
+        String genre = _genreController.text.toString();
+        String url;
 
-    // Handle image upload for both web and non-web platforms
-    if (kIsWeb && _webImage != null) {
-      UploadTask uploadTask = FirebaseStorage.instance
-          .ref("images/${DateTime.now()}.png")
-          .putData(await _webImage!.readAsBytes());
-      TaskSnapshot taskSnapshot = await uploadTask;
-      url = await taskSnapshot.ref.getDownloadURL();
+        // Handle image upload for both web and non-web platforms
+        if (kIsWeb && _webImage != null) {
+          UploadTask uploadTask = FirebaseStorage.instance
+              .ref("images/${DateTime.now()}.png")
+              .putData(await _webImage!.readAsBytes());
+          TaskSnapshot taskSnapshot = await uploadTask;
+          url = await taskSnapshot.ref.getDownloadURL();
+        } else {
+          throw 'No image selected!';
+        }
+
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+        await firestore.collection('books').add({
+          "name": name,
+          "price": price,
+          "description": description,
+          "author": author,
+          "publisher": publisher,
+          "language": language,
+          "length": length,
+          "genre": genre,
+          "imageurl": url,
+          "createdAt": FieldValue.serverTimestamp(),
+          "updatedAt": FieldValue.serverTimestamp(),
+        });
+
+        // Navigate to BookListPage after successful upload
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => BookListPage()),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
     }
-    else {
-      throw 'No image selected!';
-    }
-
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    await firestore.collection('books').add({
-      "name": name,
-      "price": price,
-      "description": description,
-      "author": author,
-      "publisher": publisher,
-      "language": language,
-      "length": length,
-      "genre": genre,
-      "imageurl": url,
-      "createdAt": FieldValue.serverTimestamp(),
-      "updatedAt": FieldValue.serverTimestamp(),
-    });
-
   }
+
 
   @override
   Widget build(BuildContext context) {
