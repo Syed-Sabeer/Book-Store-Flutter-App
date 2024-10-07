@@ -1,4 +1,3 @@
-
 import 'package:book_grocer/common/color_extenstion.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,8 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class BookSinglePage extends StatefulWidget {
   final Map<String, dynamic> bookData;
+  final String bookId;
 
-  const BookSinglePage({Key? key, required this.bookData}) : super(key: key);
+  const BookSinglePage({required this.bookData, required this.bookId, Key? key}) : super(key: key);
 
   @override
   _BookSinglePageState createState() => _BookSinglePageState();
@@ -52,9 +52,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
       final cartRef = FirebaseFirestore.instance.collection('cart').doc(user.uid);
       final cartSnapshot = await cartRef.get();
 
-      String? bookId = widget.bookData['id'];
-      print("Book ID to add: $bookId");
-
+      String? bookId = widget.bookId;
       if (bookId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Book ID is null')),
@@ -67,8 +65,6 @@ class _BookSinglePageState extends State<BookSinglePage> {
         List<dynamic> quantities = cartSnapshot['quantities'] ?? [];
 
         int bookIndex = bookIds.indexOf(bookId);
-        print("Book Index: $bookIndex");
-
         if (bookIndex >= 0) {
           quantities[bookIndex] += _quantity;
         } else {
@@ -76,13 +72,11 @@ class _BookSinglePageState extends State<BookSinglePage> {
           quantities.add(_quantity);
         }
 
-        print("Updating Cart: $bookIds, $quantities");
         await cartRef.update({
           'bookIds': bookIds,
           'quantities': quantities,
         });
       } else {
-        print("Creating new cart for user: ${user.uid}");
         await cartRef.set({
           'userId': user.uid,
           'bookIds': [bookId],
@@ -95,14 +89,11 @@ class _BookSinglePageState extends State<BookSinglePage> {
         const SnackBar(content: Text('Book added to cart')),
       );
     } catch (e) {
-      print("Error adding to cart: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add to cart: $e')),
       );
     }
   }
-
-
 
   Future<void> _submitReview() async {
     if (_userRating == 0 || _reviewController.text.isEmpty) {
@@ -122,7 +113,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
       }
 
       await FirebaseFirestore.instance.collection('reviews').add({
-        'bookId': widget.bookData['id'],
+        'bookId': widget.bookId,
         'userId': user.uid,
         'rating': _userRating,
         'review': _reviewController.text,
@@ -148,7 +139,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
 
-    String imageUrl = widget.bookData["img"] ?? "https://example.com/default_image.png"; // Default image
+    String imageUrl = widget.bookData["imageurl"] ?? "https://example.com/default_image.png"; // Default image
     String bookName = widget.bookData["name"] ?? "Unknown Book";
     String author = widget.bookData["author"] ?? "Unknown Author";
     double price = widget.bookData["price"] ?? 0.0;
@@ -188,6 +179,9 @@ class _BookSinglePageState extends State<BookSinglePage> {
                   imageUrl,
                   height: media.width * 0.6,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.error, size: 60);
+                  },
                 ),
               ),
               const SizedBox(height: 20),
@@ -310,48 +304,45 @@ class _BookSinglePageState extends State<BookSinglePage> {
                   SizedBox(height: 10),
                   ReviewTile(
                     reviewerName: "Jane Smith",
-                    rating: 3,
-                    review: "Good read, but could have been better.",
+                    rating: 5,
+                    review: "A must-read for everyone.",
                   ),
+                  SizedBox(height: 10),
                 ],
               ),
               const SizedBox(height: 20),
-              const Text(
-                "Write Your Review",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  for (int i = 1; i <= 5; i++)
-                    IconButton(
-                      icon: Icon(
-                        i <= _userRating ? Icons.star : Icons.star_border,
-                        color: Colors.yellow,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _userRating = i.toDouble();
-                        });
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: 10),
               TextField(
                 controller: _reviewController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: 'Write your review here...',
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                  labelText: "Write your review",
                 ),
-                maxLines: 4,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Rate this book:"),
+                  Row(
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        icon: Icon(
+                          index < _userRating
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: Colors.yellow,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _userRating = index + 1.0;
+                          });
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -379,7 +370,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
 
 class ReviewTile extends StatelessWidget {
   final String reviewerName;
-  final int rating;
+  final double rating;
   final String review;
 
   const ReviewTile({
@@ -391,35 +382,27 @@ class ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          reviewerName,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        Row(
-          children: List.generate(
-            5,
-                (index) => Icon(
-              index < rating ? Icons.star : Icons.star_border,
-              color: Colors.yellow,
-              size: 20,
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(reviewerName, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Row(
+              children: List.generate(5, (index) {
+                return Icon(
+                  index < rating ? Icons.star : Icons.star_border,
+                  color: Colors.yellow,
+                );
+              }),
             ),
-          ),
+            const SizedBox(height: 5),
+            Text(review),
+          ],
         ),
-        Text(
-          review,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.grey,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
