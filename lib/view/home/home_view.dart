@@ -33,6 +33,7 @@ class _HomeViewState extends State<HomeView> {
       List<Map<String, dynamic>> books = [];
       for (var doc in snapshot.docs) {
         books.add({
+          'bookId': doc.id, // Add the document ID here
           'name': doc['name'],
           'author': doc['author'],
           'img': doc['imageurl'], // Assuming your Firestore has this field
@@ -51,7 +52,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    String imageUrl = Uri.encodeFull("https://firebasestorage.googleapis.com/v0/b/book-store-a2922.appspot.com/o/images/2024-10-05 15:28:26.818.png?alt=media&token=5cd380ba-9926-481d-8364-189f055d83a0");
+    String imageUrl = Uri.encodeFull("https://firebasestorage.googleapis.com/v0/b/book-store-a2922.appspot.com/o/images/2024-10-05%2015:28:26.818.png?alt=media&token=5cd380ba-9926-481d-8364-189f055d83a0");
 
     var media = MediaQuery.of(context).size;
 
@@ -122,6 +123,7 @@ class _HomeViewState extends State<HomeView> {
                     ),
                     // FutureBuilder to fetch and display new arrivals
                     FutureBuilder<List<Map<String, dynamic>>>(
+
                       future: fetchNewArrivals(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -146,12 +148,16 @@ class _HomeViewState extends State<HomeView> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BookSinglePage(bookData: bObj),
+                                      builder: (context) => BookSinglePage(
+                                        bookData: bObj,
+                                        bookId: bObj['bookId'],  // Pass the bookId here
+                                      ),
                                     ),
                                   );
                                 },
                                 child: RecentlyCell(
                                   iObj: bObj,
+                                  bookId: bObj['bookId'], // Pass the bookId to RecentlyCell
                                 ),
                               );
                             },
