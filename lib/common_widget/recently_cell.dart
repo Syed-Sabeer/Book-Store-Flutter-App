@@ -11,13 +11,17 @@ class RecentlyCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
-    String imagePath = iObj["img"]?.toString() ?? 'assets/default_image.png'; // fallback image
+
+    // Construct the image URL
+    String imagePath = iObj["img"] != null 
+        ? iObj["img"] // Use the full URL from Firestore
+        : 'assets/default_image.png'; // fallback image
     String name = iObj["name"]?.toString() ?? 'Unknown Title';
     String author = iObj["author"]?.toString() ?? 'Unknown Author';
 
     return GestureDetector(
       onTap: () {
-        // Navigate to BookSinglePage
+        // Navigate to BookSinglePage and pass bookData and bookId
         Navigator.push(
           context,
           MaterialPageRoute(
