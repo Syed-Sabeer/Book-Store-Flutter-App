@@ -1,10 +1,13 @@
-import 'package:flutter/material.dart';
+
 import 'package:book_grocer/common/color_extenstion.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BookSinglePage extends StatefulWidget {
   final Map<String, dynamic> bookData;
 
-  const BookSinglePage({super.key, required this.bookData});
+  const BookSinglePage({Key? key, required this.bookData}) : super(key: key);
 
   @override
   _BookSinglePageState createState() => _BookSinglePageState();
@@ -14,6 +17,12 @@ class _BookSinglePageState extends State<BookSinglePage> {
   int _quantity = 1; // Initial quantity
   double _userRating = 0; // User's rating
   final _reviewController = TextEditingController(); // Controller for review input
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
+  }
 
   void _incrementQuantity() {
     setState(() {
@@ -29,14 +38,129 @@ class _BookSinglePageState extends State<BookSinglePage> {
     }
   }
 
+  Future<void> _addToCart() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please log in to add books to the cart')),
+        );
+        return;
+      }
+
+      final cartRef = FirebaseFirestore.instance.collection('cart').doc(user.uid);
+      final cartSnapshot = await cartRef.get();
+
+      String? bookId = widget.bookData['id'];
+      print("Book ID to add: $bookId");
+
+      if (bookId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Book ID is null')),
+        );
+        return;
+      }
+
+      if (cartSnapshot.exists) {
+        List<dynamic> bookIds = cartSnapshot['bookIds'] ?? [];
+        List<dynamic> quantities = cartSnapshot['quantities'] ?? [];
+
+        int bookIndex = bookIds.indexOf(bookId);
+        print("Book Index: $bookIndex");
+
+        if (bookIndex >= 0) {
+          quantities[bookIndex] += _quantity;
+        } else {
+          bookIds.add(bookId);
+          quantities.add(_quantity);
+        }
+
+        print("Updating Cart: $bookIds, $quantities");
+        await cartRef.update({
+          'bookIds': bookIds,
+          'quantities': quantities,
+        });
+      } else {
+        print("Creating new cart for user: ${user.uid}");
+        await cartRef.set({
+          'userId': user.uid,
+          'bookIds': [bookId],
+          'quantities': [_quantity],
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Book added to cart')),
+      );
+    } catch (e) {
+      print("Error adding to cart: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add to cart: $e')),
+      );
+    }
+  }
+
+
+
+  Future<void> _submitReview() async {
+    if (_userRating == 0 || _reviewController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please provide both a rating and a review')),
+      );
+      return;
+    }
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please log in to submit a review')),
+        );
+        return;
+      }
+
+      await FirebaseFirestore.instance.collection('reviews').add({
+        'bookId': widget.bookData['id'],
+        'userId': user.uid,
+        'rating': _userRating,
+        'review': _reviewController.text,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Review submitted successfully')),
+      );
+
+      setState(() {
+        _userRating = 0;
+        _reviewController.clear();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to submit review: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
 
+    String imageUrl = widget.bookData["img"] ?? "https://example.com/default_image.png"; // Default image
+    String bookName = widget.bookData["name"] ?? "Unknown Book";
+    String author = widget.bookData["author"] ?? "Unknown Author";
+    double price = widget.bookData["price"] ?? 0.0;
+    String length = widget.bookData["length"]?.toString() ?? "N/A";
+    String language = widget.bookData["language"] ?? "Unknown";
+    String publisher = widget.bookData["publisher"] ?? "Unknown Publisher";
+    String description = widget.bookData["description"] ?? "No description available";
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: TColor.primary,
+        backgroundColor: Colors.blue,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black),
@@ -45,31 +169,12 @@ class _BookSinglePageState extends State<BookSinglePage> {
           },
         ),
         actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black),
-                onPressed: () {
-                  // Handle cart action
-                },
-              ),
-              Positioned(
-                right: 5,
-                top: 5,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle
-                  ),
-                  child: const Text(
-                    "1",
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              )
-            ],
-          )
+          IconButton(
+            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black),
+            onPressed: () {
+              Navigator.pushNamed(context, '/cart');
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -79,19 +184,20 @@ class _BookSinglePageState extends State<BookSinglePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: Image.asset(
-                  widget.bookData["img"],
+                child: Image.network(
+                  imageUrl,
                   height: media.width * 0.6,
                   fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(height: 20),
               Text(
-                "\$${widget.bookData["price"].toStringAsFixed(2)} - \$${(widget.bookData["price"] * 1.5).toStringAsFixed(2)}",
+                "\$${price.toStringAsFixed(2)} ",
                 style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 8),
               const Row(
@@ -107,22 +213,26 @@ class _BookSinglePageState extends State<BookSinglePage> {
               ),
               const SizedBox(height: 20),
               Text(
-                widget.bookData["name"],
+                bookName,
                 style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 5),
               Text(
-                "Author: ${widget.bookData["author"]}",
+                "Author: $author",
                 style: const TextStyle(
-                    fontSize: 16, color: Colors.grey, fontStyle: FontStyle.italic),
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                "Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content.",
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+              Text(
+                description,
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
               const SizedBox(height: 20),
               Wrap(
@@ -130,15 +240,15 @@ class _BookSinglePageState extends State<BookSinglePage> {
                 runSpacing: 10,
                 children: [
                   Chip(
-                    label: Text("Length ${widget.bookData["length"]} Pages"),
+                    label: Text("Length: $length Pages"),
                     backgroundColor: Colors.grey[200],
                   ),
                   Chip(
-                    label: Text("Language ${widget.bookData["language"]}"),
+                    label: Text("Language: $language"),
                     backgroundColor: Colors.grey[200],
                   ),
                   Chip(
-                    label: Text("Publisher ${widget.bookData["publisher"]}"),
+                    label: Text("Publisher: $publisher"),
                     backgroundColor: Colors.grey[200],
                   ),
                 ],
@@ -170,11 +280,9 @@ class _BookSinglePageState extends State<BookSinglePage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    backgroundColor: TColor.primary,
+                    backgroundColor: Colors.blue,
                   ),
-                  onPressed: () {
-                    // Add to cart logic here
-                  },
+                  onPressed: _addToCart,
                   child: const Text(
                     "+ Add To Cart",
                     style: TextStyle(fontSize: 16, color: Colors.white),
@@ -182,19 +290,18 @@ class _BookSinglePageState extends State<BookSinglePage> {
                 ),
               ),
               const SizedBox(height: 75),
-
               const Text(
                 "Ratings & Reviews",
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 10),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Display existing reviews here (hardcoded for demo)
+                children: const [
                   ReviewTile(
                     reviewerName: "John Doe",
                     rating: 4,
@@ -212,9 +319,10 @@ class _BookSinglePageState extends State<BookSinglePage> {
               const Text(
                 "Write Your Review",
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 10),
               Row(
@@ -222,9 +330,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
                   for (int i = 1; i <= 5; i++)
                     IconButton(
                       icon: Icon(
-                        i <= _userRating
-                            ? Icons.star
-                            : Icons.star_border,
+                        i <= _userRating ? Icons.star : Icons.star_border,
                         color: Colors.yellow,
                       ),
                       onPressed: () {
@@ -246,16 +352,21 @@ class _BookSinglePageState extends State<BookSinglePage> {
                 maxLines: 4,
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: TColor.primary,
-                ),
-                onPressed: () {
-                  // Submit review logic here
-                },
-                child: const Text(
-                  "Submit Review",
-                  style: TextStyle(color: Colors.white),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    backgroundColor: Colors.blue,
+                  ),
+                  onPressed: _submitReview,
+                  child: const Text(
+                    "Submit Review",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ),
             ],
@@ -266,78 +377,49 @@ class _BookSinglePageState extends State<BookSinglePage> {
   }
 }
 
-class ReviewTile extends StatefulWidget {
+class ReviewTile extends StatelessWidget {
   final String reviewerName;
   final int rating;
   final String review;
 
   const ReviewTile({
-    super.key,
+    Key? key,
     required this.reviewerName,
     required this.rating,
     required this.review,
-  });
-
-  @override
-  _ReviewTileState createState() => _ReviewTileState();
-}
-
-class _ReviewTileState extends State<ReviewTile> {
-  bool _liked = false; // Track if review is liked
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.reviewerName,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    for (int i = 1; i <= 5; i++)
-                      Icon(
-                        i <= widget.rating
-                            ? Icons.star
-                            : Icons.star_border,
-                        color: Colors.yellow,
-                        size: 20,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  widget.review,
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          reviewerName,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        Row(
+          children: List.generate(
+            5,
+                (index) => Icon(
+              index < rating ? Icons.star : Icons.star_border,
+              color: Colors.yellow,
+              size: 20,
             ),
           ),
-          IconButton(
-            icon: Icon(
-              _liked ? Icons.favorite : Icons.favorite_border,
-              color: _liked ? Colors.red : Colors.grey,
-              size: 24,
-            ),
-            onPressed: () {
-              setState(() {
-                _liked = !_liked;
-              });
-            },
+        ),
+        Text(
+          review,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.grey,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

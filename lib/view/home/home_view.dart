@@ -1,16 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore package
 import 'package:book_grocer/common/color_extenstion.dart';
 import 'package:book_grocer/view/book_detail/book_detail_view.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-
-import '../../common_widget/best_seller_cell.dart';
-import '../../common_widget/genres_cell.dart';
 import '../../common_widget/recently_cell.dart';
-import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
 import '../../common_widget/top_picks_cell.dart';
 import '../login/sign_up_view.dart';
-import '../main_tab/main_tab_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -20,123 +15,48 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-
   TextEditingController txtName = TextEditingController();
   TextEditingController txtEmail = TextEditingController();
 
-  List<Map<String, dynamic>> topPicksArr = [
-    {
-      "name": "The Disappearance of Sabeer",
-      "author": "Michael Rosen",
-      "img": "assets/img/1.jpg",
-      "price": 15.99,
-      "length": 220,
-      "language": "English",
-      "publisher": "Baker Book"
-    },
-    {
-      "name": "Fatherhood",
-      "author": "Marcus Berkmann",
-      "img": "assets/img/2.jpg",
-      "price": 12.50,
-      "length": 220,
-      "language": "English",
-      "publisher": "Baker Book"
-    },
-    {
-      "name": "The Time Travellers Handbook",
-      "author": "Stride Lottie",
-      "img": "assets/img/3.jpg",
-      "price": 10.99,
-      "length": 220,
-      "language": "English",
-      "publisher": "Baker Book"
-    }
-  ];
+  // Define the GlobalKey for the Scaffold
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  List<Map<String, dynamic>> bestArr = [
-    {
-      "name": "Fatherhood",
-      "author": "by Christopher Wilson",
-      "img": "assets/img/4.jpg",
-      "rating": 5.0,
-      "price": 18.00,
-      "length": 220,
-      "language": "English",
-      "publisher": "Baker Book"
-    },
-    {
-      "name": "In A Land Of Paper Gods",
-      "author": "by Rebecca Mackenzie",
-      "img": "assets/img/5.jpg",
-      "rating": 4.0,
-      "price": 20.00,
-      "length": 220,
-      "language": "English",
-      "publisher": "Baker Book"
-    },
-    {
-      "name": "Tattletale",
-      "author": "by Sarah J. Noughton",
-      "img": "assets/img/6.jpg",
-      "rating": 3.0,
-      "price": 13.75,
-      "length": 220,
-      "language": "English",
-      "publisher": "Baker Book"
-    }
-  ];
+  // Fetch New Arrivals from Firestore
+  Future<List<Map<String, dynamic>>> fetchNewArrivals() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('books')
+          .orderBy('createdAt', descending: true) // Order by createdAt timestamp
+          .limit(7) // Get the top 7 books
+          .get();
 
-  List<Map<String, dynamic>> genresArr = [
-    {
-      "name": "Graphic Novels",
-      "img": "assets/img/g1.png"
-
-    },
-    {
-      "name": "Graphic Novels",
-      "img": "assets/img/g1.png"
-    },
-    {
-      "name": "Graphic Novels",
-      "img": "assets/img/g1.png"
+      List<Map<String, dynamic>> books = [];
+      for (var doc in snapshot.docs) {
+        books.add({
+          'name': doc['name'],
+          'author': doc['author'],
+          'img': doc['imageurl'], // Assuming your Firestore has this field
+          'price': doc['price'],
+          'length': doc['length'],
+          'language': doc['language'],
+          'publisher': doc['publisher'],
+        });
+      }
+      return books;
+    } catch (e) {
+      print('Error fetching new arrivals: $e');
+      return [];
     }
-  ];
-
-  List<Map<String, dynamic>> newArr = [
-    {
-      "name": "The Fatal Tree",
-      "author": "by Jake Arnott",
-      "img": "assets/img/10.jpg",
-      "price": 8.99,
-      "length": 220,
-      "language": "English",
-      "publisher": "Baker Book"
-    },
-    {
-      "name": "Day Four",
-      "author": "by LOTZ, SARAH",
-      "img": "assets/img/11.jpg",
-      "price": 9.50,
-      "length": 220,
-      "language": "English",
-      "publisher": "Baker Book"
-    },
-    {
-      "name": "Door to Door",
-      "author": "by Edward Humes",
-      "img": "assets/img/12.jpg",
-      "price": 7.99,
-      "length": 220,
-      "language": "English",
-      "publisher": "Baker Book"
-    }
-  ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    String imageUrl = Uri.encodeFull("https://firebasestorage.googleapis.com/v0/b/book-store-a2922.appspot.com/o/images/2024-10-05 15:28:26.818.png?alt=media&token=5cd380ba-9926-481d-8364-189f055d83a0");
+
     var media = MediaQuery.of(context).size;
+
     return Scaffold(
+      key: scaffoldKey, // Set the key for the Scaffold
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
@@ -153,9 +73,9 @@ class _HomeViewState extends State<HomeView> {
                       width: media.width,
                       height: media.width,
                       decoration: BoxDecoration(
-                          color: TColor.primary,
-                          borderRadius:
-                              BorderRadius.circular(media.width * 0.5)),
+                        color: TColor.primary,
+                        borderRadius: BorderRadius.circular(media.width * 0.5),
+                      ),
                     ),
                   ),
                 ),
@@ -163,247 +83,88 @@ class _HomeViewState extends State<HomeView> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      height: media.width * 0.1,
-                    ),
+                    SizedBox(height: media.width * 0.1),
                     AppBar(
                       backgroundColor: Colors.transparent,
                       elevation: 0,
-                      title: const Row(children: [
-                        Text(
-                          "Our Top Picks",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700),
-                        )
-                      ]),
+                      title: const Text(
+                        "Our Top Picks",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       leading: Container(),
                       leadingWidth: 1,
                       actions: [
                         IconButton(
-                            onPressed: () {
-
-                                sideMenuScaffoldKey.currentState?.openEndDrawer();
-
-                            }, icon: const Icon(Icons.menu, color: Colors.white,))
-
+                          onPressed: () {
+                            scaffoldKey.currentState?.openEndDrawer(); // Use the defined key
+                          },
+                          icon: const Icon(Icons.menu, color: Colors.white),
+                        ),
                       ],
                     ),
-                    SizedBox(
-                      width: media.width,
-                      height: media.width * 0.8,
-                      child: CarouselSlider.builder(
-                        itemCount: topPicksArr.length,
-                        itemBuilder: (BuildContext context, int itemIndex,
-                            int pageViewIndex) {
-                          var iObj = topPicksArr[itemIndex] as Map? ?? {};
-                          return TopPicksCell(
-                            iObj: iObj,
-                          );
-                        },
-                        options: CarouselOptions(
-                          autoPlay: false,
-                          aspectRatio: 1,
-                          enlargeCenterPage: true,
-                          viewportFraction: 0.45,
-                          enlargeFactor: 0.4,
-                          enlargeStrategy: CenterPageEnlargeStrategy.zoom,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(children: [
-                        Text(
-                          "Bestsellers",
-                          style: TextStyle(
-                              color: TColor.text,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700),
-                        )
-                      ]),
-                    ),
-                    SizedBox(
-                      height: media.width * 0.9,
-                      child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: bestArr.length,
-                          itemBuilder: ((context, index) {
-                            var bObj = bestArr[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BookSinglePage(bookData: bObj),
-                                  ),
-                                );
-                              },
-                              child: BestSellerCell(
-                                bObj: bObj,
-                              ),
-                            );
-                          })),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(children: [
-                        Text(
-                          "Genres",
-                          style: TextStyle(
-                              color: TColor.text,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700),
-                        )
-                      ]),
-                    ),
-                    SizedBox(
-                      height: media.width * 0.7,
-                      child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: genresArr.length,
-                          itemBuilder: ((context, index) {
-                            var bObj = genresArr[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BookSinglePage(bookData: bObj),
-                                  ),
-                                );
-                              },
-                              child: GenresCell(
-                                bObj: bObj,
-                                bgcolor: index % 2 == 0
-                                    ? TColor.color1
-                                    : TColor.color2,
-                              ),
-                            );
-                          })),
-                    ),
-                    SizedBox(
-                      height: media.width * 0.1,
-                    ),
+                    SizedBox(height: media.width * 0.1),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(children: [
                         Text(
                           "New Arrival",
                           style: TextStyle(
-                              color: TColor.text,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700),
+                            color: TColor.text,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                          ),
                         )
                       ]),
                     ),
-                    SizedBox(
-                      height: media.width * 0.9,
-                      child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: newArr.length,
-                          itemBuilder: ((context, index) {
-                            var bObj = newArr[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BookSinglePage(bookData: bObj),
-                                  ),
-                                );
-                              },
-                              child: RecentlyCell(
-                                iObj: bObj,
-                              ),
-                            );
-                          })),
+                    // FutureBuilder to fetch and display new arrivals
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future: fetchNewArrivals(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(child: Text("Error: ${snapshot.error}"));
+                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return Center(child: Text("No new arrivals found."));
+                        }
+
+                        List<Map<String, dynamic>> newArrivals = snapshot.data!;
+                        return SizedBox(
+                          height: media.width * 0.9,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: newArrivals.length,
+                            itemBuilder: (context, index) {
+                              var bObj = newArrivals[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => BookSinglePage(bookData: bObj),
+                                    ),
+                                  );
+                                },
+                                child: RecentlyCell(
+                                  iObj: bObj,
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
-                    SizedBox(
-                      height: media.width * 0.1,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(children: [
-                        Text(
-                          "Monthly Newsletter",
-                          style: TextStyle(
-                              color: TColor.text,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700),
-                        )
-                      ]),
-                    ),
-
-                    Container(
-                      width: double.maxFinite,
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 20, horizontal: 20),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15, horizontal: 15),
-                      decoration: BoxDecoration(
-                          color: TColor.textbox.withOpacity(0.4),
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Receive our monthly newsletter and receive updates on new stock, books and the occasional promotion.",
-                              style: TextStyle(
-                                color: TColor.subTitle,
-                                fontSize: 12,
-                              ),
-                            ),
-
-                             const SizedBox(
-                              height: 15,
-                            ),
-
-                             RoundTextField(
-                              controller: txtName,
-                              hintText: "Name",
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            RoundTextField(
-                              controller: txtEmail,
-                              hintText: "Email Address",
-                            ),
-
-                            const SizedBox(
-                              height: 15,
-                            ),
-
-                            Row(mainAxisAlignment: MainAxisAlignment.end,children: [
-                              MiniRoundButton(title: "Sign Up", onPressed:
-                              (){
-                                 Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const SignUpView()));
-                              }, )
-                            ],)
-
-
-                          ]),
-                    ),
-
-
-
-                     SizedBox(
-                      height: media.width * 0.1,
-                    ),
-
+                    SizedBox(height: media.width * 0.1),
+                    // Add other sections here as needed...
                   ],
-                )
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),

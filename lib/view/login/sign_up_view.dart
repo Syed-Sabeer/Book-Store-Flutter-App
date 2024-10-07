@@ -52,23 +52,15 @@ class _SignUpViewState extends State<SignUpView> {
                     fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 20),
-              RoundTextField(
-                controller: txtFirstName,
-                hintText: "First & Last Name",
-              ),
-              const SizedBox(height: 15),
+
               RoundTextField(
                 controller: emailcon,
                 hintText: "Email Address",
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 15),
-              RoundTextField(
-                controller: txtMobile,
-                hintText: "Mobile Phone",
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 20),
+
+
               RoundTextField(
                 controller: passwordcon,
                 hintText: "Password",
