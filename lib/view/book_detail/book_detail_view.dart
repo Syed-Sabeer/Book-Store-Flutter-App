@@ -139,7 +139,14 @@ class _BookSinglePageState extends State<BookSinglePage> {
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
 
-    String imageUrl = widget.bookData["imageurl"] ?? "https://example.com/default_image.png"; // Default image
+    // Verify the book data contains the expected fields
+    print('Book Data: ${widget.bookData}');
+
+    // Fetching image URL with a default fallback
+    String imageUrl = widget.bookData["img"] ?? "https://via.placeholder.com/150";
+
+    print('Image URL: $imageUrl'); // Log the image URL for debugging
+
     String bookName = widget.bookData["name"] ?? "Unknown Book";
     String author = widget.bookData["author"] ?? "Unknown Author";
     double price = widget.bookData["price"] ?? 0.0;
@@ -174,12 +181,14 @@ class _BookSinglePageState extends State<BookSinglePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Image rendering with improved error handling
               Center(
                 child: Image.network(
                   imageUrl,
                   height: media.width * 0.6,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
+                    print('Failed to load image: $error'); // Log the error for debugging
                     return const Icon(Icons.error, size: 60);
                   },
                 ),
@@ -274,7 +283,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    backgroundColor: Colors.blue,
+                    backgroundColor: TColor.primary,
                   ),
                   onPressed: _addToCart,
                   child: const Text(
@@ -304,45 +313,48 @@ class _BookSinglePageState extends State<BookSinglePage> {
                   SizedBox(height: 10),
                   ReviewTile(
                     reviewerName: "Jane Smith",
-                    rating: 5,
-                    review: "A must-read for everyone.",
+                    rating: 3,
+                    review: "Good read, but could have been better.",
                   ),
-                  SizedBox(height: 10),
                 ],
               ),
               const SizedBox(height: 20),
-              TextField(
-                controller: _reviewController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: "Write your review",
+              const Text(
+                "Write Your Review",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
               const SizedBox(height: 10),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Rate this book:"),
-                  Row(
-                    children: List.generate(5, (index) {
-                      return IconButton(
-                        icon: Icon(
-                          index < _userRating
-                              ? Icons.star
-                              : Icons.star_border,
-                          color: Colors.yellow,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _userRating = index + 1.0;
-                          });
-                        },
-                      );
-                    }),
-                  ),
+                  for (int i = 1; i <= 5; i++)
+                    IconButton(
+                      icon: Icon(
+                        i <= _userRating ? Icons.star : Icons.star_border,
+                        color: Colors.yellow,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _userRating = i.toDouble();
+                        });
+                      },
+                    ),
                 ],
               ),
               const SizedBox(height: 10),
+              TextField(
+                controller: _reviewController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Write your review here...',
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                ),
+                maxLines: 4,
+              ),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -351,7 +363,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    backgroundColor: Colors.blue,
+                    backgroundColor: TColor.primary,
                   ),
                   onPressed: _submitReview,
                   child: const Text(
@@ -370,7 +382,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
 
 class ReviewTile extends StatelessWidget {
   final String reviewerName;
-  final double rating;
+  final int rating;
   final String review;
 
   const ReviewTile({
@@ -382,27 +394,35 @@ class ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(reviewerName, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Row(
-              children: List.generate(5, (index) {
-                return Icon(
-                  index < rating ? Icons.star : Icons.star_border,
-                  color: Colors.yellow,
-                );
-              }),
-            ),
-            const SizedBox(height: 5),
-            Text(review),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          reviewerName,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
-      ),
+        Row(
+          children: List.generate(
+            5,
+                (index) => Icon(
+              index < rating ? Icons.star : Icons.star_border,
+              color: Colors.yellow,
+              size: 20,
+            ),
+          ),
+        ),
+        Text(
+          review,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.grey,
+          ),
+        ),
+      ],
     );
   }
 }

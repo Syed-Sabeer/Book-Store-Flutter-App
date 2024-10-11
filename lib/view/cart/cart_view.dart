@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:book_grocer/view/login/sign_in_view.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
- // Import SignInView
-import 'package:book_grocer/view/checkout/checkout_view.dart'; // Import CheckoutView
-import 'package:flutter/material.dart';
+import 'package:book_grocer/view/checkout/checkout_view.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -13,29 +13,8 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  List<Map<String, dynamic>> cartItems = [
-    {
-      "name": "The Disappearance of Emila Zola",
-      "author": "Michael Rosen",
-      "img": "assets/img/1.jpg",
-      "price": 15.99,
-      "quantity": 1
-    },
-    {
-      "name": "Fatherhood",
-      "author": "Marcus Berkmann",
-      "img": "assets/img/2.jpg",
-      "price": 12.50,
-      "quantity": 2
-    },
-    {
-      "name": "The Time Travellers Handbook",
-      "author": "Stride Lottie",
-      "img": "assets/img/3.jpg",
-      "price": 10.99,
-      "quantity": 1
-    }
-  ];
+  List<Map<String, dynamic>> cartItems = [];
+  bool isLoading = true;
 
   // Function to check if the user is logged in
   void checkLoginStatus() {
@@ -51,6 +30,45 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
+  // Fetch cart items from Firestore
+  Future<void> fetchCartItems() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Query the cart for the logged-in user
+      var cartRef = FirebaseFirestore.instance
+          .collection('cart')
+          .where('userId', isEqualTo: user.uid);
+
+      var cartSnapshot = await cartRef.get();
+      if (cartSnapshot.docs.isNotEmpty) {
+        var cartData = cartSnapshot.docs.first.data();
+        List<String> bookIds = List<String>.from(cartData['bookIds']);
+        List<int> quantities = List<int>.from(cartData['quantities']);
+
+        // Fetch book details from 'books' collection
+        for (int i = 0; i < bookIds.length; i++) {
+          var bookDoc = await FirebaseFirestore.instance
+              .collection('books')
+              .doc(bookIds[i])
+              .get();
+          if (bookDoc.exists) {
+            var bookData = bookDoc.data();
+            cartItems.add({
+              "name": bookData?['name'] ?? 'Unknown Title',
+              "author": bookData?['author'] ?? 'Unknown Author',
+              "img": bookData?['imageurl'] ?? 'assets/img/default.jpg',
+              "price": bookData?['price'] ?? 0.0,
+              "quantity": quantities[i],
+            });
+          }
+        }
+      }
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   double getTotalPrice() {
     return cartItems.fold(
         0, (total, item) => total + (item["price"] * item["quantity"]));
@@ -59,8 +77,8 @@ class _CartPageState extends State<CartPage> {
   @override
   void initState() {
     super.initState();
-    // Check if the user is logged in when the page is loaded
     checkLoginStatus();
+    fetchCartItems();
   }
 
   @override
@@ -77,7 +95,9 @@ class _CartPageState extends State<CartPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: cartItems.isEmpty
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : cartItems.isEmpty
           ? const Center(child: Text("Your cart is empty"))
           : Column(
         children: [
@@ -90,7 +110,7 @@ class _CartPageState extends State<CartPage> {
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   child: ListTile(
-                    leading: Image.asset(
+                    leading: Image.network(
                       item["img"].toString(),
                       width: 50,
                       height: 75,
@@ -98,38 +118,19 @@ class _CartPageState extends State<CartPage> {
                     ),
                     title: Text(item["name"].toString()),
                     subtitle: Text("by ${item["author"]}"),
-                    trailing: Flexible(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                "\$${item["price"].toStringAsFixed(2)}",
-                                style: TextStyle(
-                                  color: TColor.money,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text("Qty: ${item["quantity"]}"),
-                            ],
+                    trailing: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "\$${item["price"].toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color: TColor.money,
+                            fontWeight: FontWeight.bold,
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.remove_shopping_cart,
-                              color: Colors.red,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                cartItems.removeAt(index);
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text("Qty: ${item["quantity"]}"),
+                      ],
                     ),
                   ),
                 );

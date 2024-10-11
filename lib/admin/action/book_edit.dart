@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart'; // To use kIsWeb
+// To use kIsWeb
 import 'package:flutter/material.dart';
 import 'dart:io'; // Import this to use File for non-web platforms
 import 'package:image_picker/image_picker.dart'; // Import the image_picker package

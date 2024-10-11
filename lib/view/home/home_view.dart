@@ -97,11 +97,11 @@ class _HomeViewState extends State<HomeView> {
                         ),
                       ),
                       leading: Container(),
-                      leadingWidth: 1,
                       actions: [
                         IconButton(
                           onPressed: () {
-                            scaffoldKey.currentState?.openEndDrawer(); // Use the defined key
+                            // Open the end drawer using the scaffold key
+                            Scaffold.of(context).openEndDrawer();
                           },
                           icon: const Icon(Icons.menu, color: Colors.white),
                         ),
@@ -110,20 +110,21 @@ class _HomeViewState extends State<HomeView> {
                     SizedBox(height: media.width * 0.1),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(children: [
-                        Text(
-                          "New Arrival",
-                          style: TextStyle(
-                            color: TColor.text,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w700,
+                      child: Row(
+                        children: [
+                          Text(
+                            "New Arrival",
+                            style: TextStyle(
+                              color: TColor.text,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        )
-                      ]),
+                        ],
+                      ),
                     ),
                     // FutureBuilder to fetch and display new arrivals
                     FutureBuilder<List<Map<String, dynamic>>>(
-
                       future: fetchNewArrivals(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -150,14 +151,14 @@ class _HomeViewState extends State<HomeView> {
                                     MaterialPageRoute(
                                       builder: (context) => BookSinglePage(
                                         bookData: bObj,
-                                        bookId: bObj['bookId'],  // Pass the bookId here
+                                        bookId: bObj['bookId'],
                                       ),
                                     ),
                                   );
                                 },
                                 child: RecentlyCell(
                                   iObj: bObj,
-                                  bookId: bObj['bookId'], // Pass the bookId to RecentlyCell
+                                  bookId: bObj['bookId'],
                                 ),
                               );
                             },

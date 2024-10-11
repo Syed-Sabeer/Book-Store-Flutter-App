@@ -13,9 +13,7 @@ class RecentlyCell extends StatelessWidget {
     var media = MediaQuery.of(context).size;
 
     // Construct the image URL
-    String imagePath = iObj["img"] != null 
-        ? iObj["img"] // Use the full URL from Firestore
-        : 'assets/default_image.png'; // fallback image
+    String imagePath = iObj["img"] ?? 'assets/default_image.png'; // fallback image
     String name = iObj["name"]?.toString() ?? 'Unknown Title';
     String author = iObj["author"]?.toString() ?? 'Unknown Author';
 
