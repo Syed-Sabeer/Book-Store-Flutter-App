@@ -17,12 +17,115 @@ class _BookSinglePageState extends State<BookSinglePage> {
   int _quantity = 1; // Initial quantity
   double _userRating = 0; // User's rating
   final _reviewController = TextEditingController(); // Controller for review input
+  bool _hasReviewed = false; // Track if the user has already reviewed this book
+  bool _canSubmitReview = false; // Track if the user can submit a review
+  List<Map<String, dynamic>> _reviews = []; // List to store fetched reviews
 
   @override
   void dispose() {
     _reviewController.dispose();
     super.dispose();
   }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfReviewed(); // Check on initialization if the user has already reviewed this book
+    _fetchReviews(); // Fetch reviews when the page is initialized
+    _checkIfCanSubmitReview(); // Check if the user can submit a review
+  }
+
+  Future<void> _checkIfReviewed() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Query Firestore to see if the user has already submitted a review for this book
+    final reviewQuery = await FirebaseFirestore.instance
+        .collection('reviews')
+        .where('bookId', isEqualTo: widget.bookId)
+        .where('userId', isEqualTo: user.uid)
+        .get();
+
+    if (reviewQuery.docs.isNotEmpty) {
+      setState(() {
+        _hasReviewed = true; // User has already reviewed
+      });
+    }
+  }
+
+
+  Future<void> _checkIfCanSubmitReview() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Check if the user has completed orders for the current book
+    final orderQuery = await FirebaseFirestore.instance
+        .collection('orders')
+        .where('userId', isEqualTo: user.uid)
+        .where('bookIds', arrayContains: widget.bookId)
+        .get();
+
+    setState(() {
+      _canSubmitReview = orderQuery.docs.isNotEmpty; // User can submit a review if they have a completed order
+    });
+  }
+
+  Future<void> _fetchReviews() async {
+    try {
+      final reviewQuery = await FirebaseFirestore.instance
+          .collection('reviews')
+          .where('bookId', isEqualTo: widget.bookId)
+          .get();
+
+      // Collect user IDs from reviews
+      List<String> userIds = reviewQuery.docs.map((doc) => doc['userId'] as String).toList();
+
+      // Fetch emails in batch
+      List<String> emails = await _getUserEmails(userIds);
+
+      // Map reviews with corresponding emails
+      setState(() {
+        _reviews = reviewQuery.docs.map((doc) {
+          String userId = doc['userId'];
+          String reviewerEmail = emails[userIds.indexOf(userId)]; // Get email by index
+          return {
+            'reviewerName': reviewerEmail, // Store the user's email
+            'rating': doc['rating'],
+            'review': doc['review'],
+          };
+        }).toList();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch reviews: $e')),
+      );
+    }
+  }
+
+  Future<List<String>> _getUserEmails(List<String> userIds) async {
+    List<String> emails = [];
+
+    for (String userId in userIds) {
+      try {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+        if (userDoc.exists && userDoc.data() != null) {
+          emails.add(userDoc['email'] ?? "Unknown User");
+        } else {
+          emails.add("Unknown User"); // Handle non-existing user
+          print('UserId $userId does not exist');
+        }
+      } catch (e) {
+        emails.add("Unknown User");
+        print('Error fetching email for userId $userId: $e');
+      }
+    }
+
+    return emails;
+  }
+
+
+
+
 
   void _incrementQuantity() {
     setState(() {
@@ -127,6 +230,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
       setState(() {
         _userRating = 0;
         _reviewController.clear();
+        _fetchReviews(); // Refresh the review list
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -139,14 +243,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
 
-    // Verify the book data contains the expected fields
-    print('Book Data: ${widget.bookData}');
-
-    // Fetching image URL with a default fallback
-    String imageUrl = widget.bookData["img"] ?? "https://via.placeholder.com/150";
-
-    print('Image URL: $imageUrl'); // Log the image URL for debugging
-
+    String imageUrl = widget.bookData["img"] ?? widget.bookData["imageurl"] ?? "https://via.placeholder.com/150";
     String bookName = widget.bookData["name"] ?? "Unknown Book";
     String author = widget.bookData["author"] ?? "Unknown Author";
     double price = widget.bookData["price"] ?? 0.0;
@@ -181,14 +278,12 @@ class _BookSinglePageState extends State<BookSinglePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image rendering with improved error handling
               Center(
                 child: Image.network(
                   imageUrl,
                   height: media.width * 0.6,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    print('Failed to load image: $error'); // Log the error for debugging
                     return const Icon(Icons.error, size: 60);
                   },
                 ),
@@ -287,141 +382,112 @@ class _BookSinglePageState extends State<BookSinglePage> {
                   ),
                   onPressed: _addToCart,
                   child: const Text(
-                    "+ Add To Cart",
+                    "Add to Cart",
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),
-              const SizedBox(height: 75),
-              const Text(
-                "Ratings & Reviews",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  ReviewTile(
-                    reviewerName: "John Doe",
-                    rating: 4,
-                    review: "Amazing book! Really enjoyed reading it.",
-                  ),
-                  SizedBox(height: 10),
-                  ReviewTile(
-                    reviewerName: "Jane Smith",
-                    rating: 3,
-                    review: "Good read, but could have been better.",
-                  ),
-                ],
-              ),
               const SizedBox(height: 20),
               const Text(
-                "Write Your Review",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                "Reviews",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  for (int i = 1; i <= 5; i++)
-                    IconButton(
-                      icon: Icon(
-                        i <= _userRating ? Icons.star : Icons.star_border,
-                        color: Colors.yellow,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _userRating = i.toDouble();
-                        });
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _reviewController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Write your review here...',
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                ),
-                maxLines: 4,
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    backgroundColor: TColor.primary,
+              if (_reviews.isEmpty)
+                const Text("No reviews yet.", style: TextStyle(color: Colors.grey)),
+              for (var review in _reviews) ...[
+                const SizedBox(height: 10),
+                _buildReviewCard(review['reviewerName'], review['rating'], review['review']),
+              ],
+              if (_canSubmitReview && !_hasReviewed) ...[ // Check if the user can submit a review
+                const SizedBox(height: 20),
+                Text("Leave a review", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                _buildRatingInput(),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _reviewController,
+                  decoration: const InputDecoration(
+                    labelText: "Write your review",
+                    border: OutlineInputBorder(),
                   ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
                   onPressed: _submitReview,
-                  child: const Text(
-                    "Submit Review",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                  child: const Text("Submit Review"),
                 ),
-              ),
+              ] else if (_hasReviewed) ...[
+                const SizedBox(height: 10),
+                const Text(
+                  "You have already submitted a review for this book.",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ] else ...[
+                const SizedBox(height: 10),
+                const Text(
+                  "You need to purchase this book to leave a review.",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ]
             ],
           ),
         ),
       ),
     );
   }
-}
 
-class ReviewTile extends StatelessWidget {
-  final String reviewerName;
-  final int rating;
-  final String review;
-
-  const ReviewTile({
-    Key? key,
-    required this.reviewerName,
-    required this.rating,
-    required this.review,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          reviewerName,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        Row(
-          children: List.generate(
-            5,
-                (index) => Icon(
-              index < rating ? Icons.star : Icons.star_border,
-              color: Colors.yellow,
-              size: 20,
+  Widget _buildReviewCard(String reviewerName, double rating, String review) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(reviewerName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Spacer(),
+                _buildStarRating(rating), // Display the star rating
+              ],
             ),
-          ),
+            const SizedBox(height: 5),
+            Text(review),
+          ],
         ),
-        Text(
-          review,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.grey,
+      ),
+    );
+  }
+
+  Widget _buildStarRating(double rating) {
+    int fullStars = rating.floor();
+    bool hasHalfStar = rating - fullStars >= 0.5;
+    int emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+    return Row(
+      children: List.generate(fullStars, (index) => const Icon(Icons.star, color: Colors.yellow, size: 20)) +
+          (hasHalfStar ? [const Icon(Icons.star_half, color: Colors.yellow, size: 20)] : []) +
+          List.generate(emptyStars, (index) => const Icon(Icons.star_border, color: Colors.grey, size: 20)),
+    );
+  }
+
+  Widget _buildRatingInput() {
+    return Row(
+      children: [
+        for (int i = 1; i <= 5; i++)
+          IconButton(
+            icon: Icon(
+              i <= _userRating ? Icons.star : Icons.star_border,
+              color: Colors.yellow,
+            ),
+            onPressed: () {
+              setState(() {
+                _userRating = i.toDouble(); // Set the user's rating
+              });
+            },
           ),
-        ),
       ],
     );
   }

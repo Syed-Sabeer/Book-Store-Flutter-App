@@ -1,37 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:book_grocer/common/color_extenstion.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OrderCompletedViewPage extends StatelessWidget {
-  final Map<String, dynamic> order;
+  final String orderId; // The Firestore document ID of the order
+  final Map<String, dynamic> order; // The order data
 
-  const OrderCompletedViewPage({super.key, required this.order});
+  const OrderCompletedViewPage({super.key, required this.orderId, required this.order});
 
   @override
   Widget build(BuildContext context) {
-    // Sample data for demonstration
-    final List<Map<String, dynamic>> orderItems = [
-      {
-        "name": "The Disappearance of Emila Zola",
-        "image": "assets/img/1.jpg",
-        "price": 15.99,
-        "quantity": 1
-      },
-      {
-        "name": "Fatherhood",
-        "image": "assets/img/2.jpg",
-        "price": 12.50,
-        "quantity": 2
-      },
-      {
-        "name": "The Time Travellers Handbook",
-        "image": "assets/img/3.jpg",
-        "price": 10.99,
-        "quantity": 1
-      }
-    ];
+    // Extract order information from the provided 'order' map
+    final List<dynamic> bookIds = order['bookIds'] ?? [];
+    final List<dynamic> quantities = order['quantities'] ?? [];
+    double shippingCost = 50.0; // Assuming fixed shipping cost, adjust as needed
+    double productTotal = 0.0;
 
-    double shippingCost = 50.0;
-    double productTotal = orderItems.fold(0, (sum, item) => sum + item['price'] * item['quantity']);
+    // Calculate the product total based on quantities
+    for (int i = 0; i < quantities.length; i++) {
+      // Example price logic, you should adjust based on actual pricing from your database
+      // Assume that the price per item is retrieved somewhere (hardcoded here for demo purposes)
+      double itemPrice = 20.0; // Replace this with actual item prices from Firestore
+      productTotal += (itemPrice * quantities[i]);
+    }
+
     double finalTotal = productTotal + shippingCost;
 
     return Scaffold(
@@ -71,14 +63,13 @@ class OrderCompletedViewPage extends StatelessWidget {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 16),
-                  _buildInfoRow('Order ID:', order['id'] ?? 'N/A'),
-                  _buildInfoRow('User:', order['user'] ?? 'N/A'),
-                  _buildInfoRow('Total Amount:', '\$${order['totalAmount']?.toStringAsFixed(2) ?? '0.00'}'),
-                  _buildInfoRow('Date:', order['date'] ?? 'N/A'),
+                  _buildInfoRow('Order ID:', orderId), // Use the passed orderId
+                  _buildInfoRow('User ID:', order['userId'] ?? 'N/A'),
+                  _buildInfoRow('Total Amount:', '\$${order['total']?.toStringAsFixed(2) ?? '0.00'}'),
+                  _buildInfoRow('Date:', (order['createdAt'] as Timestamp).toDate().toString()),
                   _buildInfoRow('Address:', order['address'] ?? 'N/A'),
                   _buildInfoRow('City:', order['city'] ?? 'N/A'),
-                  _buildInfoRow('Country:', order['country'] ?? 'N/A'),
-                  _buildInfoRow('Phone:', order['phone'] ?? 'N/A'),
+                  _buildInfoRow('Postal Code:', order['postalCode'] ?? 'N/A'),
                   _buildInfoRow('Payment Method:', order['paymentMethod'] ?? 'N/A'),
                   const SizedBox(height: 20),
 
@@ -90,10 +81,9 @@ class OrderCompletedViewPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   ListView.builder(
                     shrinkWrap: true,
-                    itemCount: orderItems.length,
+                    itemCount: bookIds.length,
                     physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
-                      final item = orderItems[index];
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         shape: RoundedRectangleBorder(
@@ -101,13 +91,11 @@ class OrderCompletedViewPage extends StatelessWidget {
                         ),
                         elevation: 5,
                         child: ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.asset(item['image'], width: 50, height: 50, fit: BoxFit.cover),
-                          ),
-                          title: Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text('Quantity: ${item['quantity']}'),
-                          trailing: Text('\$${(item['price'] * item['quantity']).toStringAsFixed(2)}',
+                          leading: Icon(Icons.book, size: 50, color: TColor.primary), // Replace with actual book images if available
+                          title: Text('Book ID: ${bookIds[index]}',
+                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text('Quantity: ${quantities[index]}'),
+                          trailing: Text('\$${(20.0 * quantities[index]).toStringAsFixed(2)}', // Replace 20.0 with actual book price
                               style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
                         ),
                       );
