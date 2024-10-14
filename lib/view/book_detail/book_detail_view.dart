@@ -20,6 +20,7 @@ class _BookSinglePageState extends State<BookSinglePage> {
   bool _hasReviewed = false; // Track if the user has already reviewed this book
   bool _canSubmitReview = false; // Track if the user can submit a review
   List<Map<String, dynamic>> _reviews = []; // List to store fetched reviews
+  bool _isInWishlist = false; // Track if the book is in the wishlist
 
   @override
   void dispose() {
@@ -33,8 +34,62 @@ class _BookSinglePageState extends State<BookSinglePage> {
     _checkIfReviewed(); // Check on initialization if the user has already reviewed this book
     _fetchReviews(); // Fetch reviews when the page is initialized
     _checkIfCanSubmitReview(); // Check if the user can submit a review
+    _checkIfInWishlist(); // Check if the book is alre
+  }
+  Future<void> _checkIfInWishlist() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final wishlistQuery = await FirebaseFirestore.instance
+        .collection('wishlist')
+        .where('bookId', isEqualTo: widget.bookId)
+        .where('userId', isEqualTo: user.uid)
+        .get();
+
+    setState(() {
+      _isInWishlist = wishlistQuery.docs.isNotEmpty; // Update the state if the book is in the wishlist
+    });
   }
 
+  Future<void> _toggleWishlist() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in to manage your wishlist')),
+      );
+      return;
+    }
+
+    final wishlistRef = FirebaseFirestore.instance.collection('wishlist');
+    final wishlistDoc = await wishlistRef
+        .where('bookId', isEqualTo: widget.bookId)
+        .where('userId', isEqualTo: user.uid)
+        .get();
+
+    if (wishlistDoc.docs.isNotEmpty) {
+      // If the book is already in the wishlist, remove it
+      await wishlistDoc.docs.first.reference.delete();
+      setState(() {
+        _isInWishlist = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Removed from wishlist')),
+      );
+    } else {
+      // If the book is not in the wishlist, add it
+      await wishlistRef.add({
+        'bookId': widget.bookId,
+        'userId': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      setState(() {
+        _isInWishlist = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Added to wishlist')),
+      );
+    }
+  }
   Future<void> _checkIfReviewed() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -352,6 +407,29 @@ class _BookSinglePageState extends State<BookSinglePage> {
                 ],
               ),
               const SizedBox(height: 30),
+
+              // Wishlist Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                  onPressed: _toggleWishlist,
+                  child: Text(
+                    _isInWishlist ? "Remove from Wishlist" : "Add to Wishlist",
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

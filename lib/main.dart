@@ -11,7 +11,11 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.android,
   );
-  FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true,);
+
+  // Enable Firestore persistence
+  FirebaseFirestore.instance.settings =
+  const Settings(persistenceEnabled: true);
+
   runApp(const MyApp());
 }
 
@@ -27,8 +31,7 @@ class MyApp extends StatelessWidget {
         primaryColor: TColor.primary,
         fontFamily: 'SF Pro Text',
       ),
-      home: const MainTabView(),
+      home: const MainTabView(), // Set MainTabView as the home
     );
   }
 }
-

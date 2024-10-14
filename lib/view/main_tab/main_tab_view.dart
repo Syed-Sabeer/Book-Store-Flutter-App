@@ -25,34 +25,31 @@ class _MainTabViewState extends State<MainTabView> with TickerProviderStateMixin
   void initState() {
     super.initState();
     controller = TabController(length: 4, vsync: this);
-    // Check login status on app start
     currentUser = FirebaseAuth.instance.currentUser;
+
+    // Listen for authentication changes
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      setState(() {
+        currentUser = user;
+      });
+    });
   }
 
   List<Map<String, dynamic>> getMenuItems() {
     // Update the menu based on whether the user is logged in or not
-    if (currentUser != null) {
-      return [
-        {"name": "Home", "icon": Icons.home},
-        {"name": currentUser!.email ?? "Account", "icon": Icons.account_circle}, // Show email instead of Account
-        {"name": "Logout", "icon": Icons.logout}, // Show logout button
-      ];
-    } else {
-      return [
-        {"name": "Home", "icon": Icons.home},
-        {"name": "Account", "icon": Icons.account_circle},
-        {"name": "Login/Register", "icon": Icons.login}, // Show Login/Register
-      ];
-    }
+    return [
+      {"name": "Home", "icon": Icons.home},
+      {
+        "name": currentUser?.email ?? "Account",
+        "icon": Icons.account_circle
+      },
+      {"name": currentUser != null ? "Logout" : "Login/Register", "icon": Icons.logout},
+    ];
   }
 
   // Function to handle logout
   Future<void> _logout() async {
     await FirebaseAuth.instance.signOut();
-    setState(() {
-      currentUser = null;
-    });
-    // Redirect to login page after logout
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const SignInView()),
@@ -99,18 +96,19 @@ class _MainTabViewState extends State<MainTabView> with TickerProviderStateMixin
                           if (index == 0) {
                             Navigator.pop(context); // Close the drawer
                             controller!.animateTo(0); // Navigate to Home tab
-                          } else if (index == 1 && currentUser != null) {
-                            Navigator.pop(context); // Close the drawer
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const AccountView()),
-                            );
                           } else if (index == 1) {
                             Navigator.pop(context); // Close the drawer
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const SignInView()),
-                            );
+                            if (currentUser != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const AccountView()),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const SignInView()),
+                              );
+                            }
                           } else if (index == 2) {
                             if (currentUser != null) {
                               _logout();
