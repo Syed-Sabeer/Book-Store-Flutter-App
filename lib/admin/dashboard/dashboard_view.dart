@@ -159,7 +159,7 @@ class DashboardPage extends StatelessWidget {
                   ),
                   _buildMetricCard(
                     context,
-                    title: 'Total Orders',
+                    title: 'Order Completed',
                     value: '345',
                     icon: Icons.shopping_cart,
                   ),

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-// To use kIsWeb
+import 'package:flutter/foundation.dart'; // To use kIsWeb
 import 'package:flutter/material.dart';
 import 'dart:io'; // Import this to use File for non-web platforms
 import 'package:image_picker/image_picker.dart'; // Import the image_picker package
@@ -27,6 +27,7 @@ class _EditBookPageState extends State<EditBookPage> {
   final TextEditingController _lengthController = TextEditingController();
 
   File? _selectedImage;
+  XFile? _webSelectedImage; // For web platforms
 
   @override
   void initState() {
@@ -46,7 +47,11 @@ class _EditBookPageState extends State<EditBookPage> {
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       setState(() {
-        _selectedImage = File(pickedImage.path);
+        if (kIsWeb) {
+          _webSelectedImage = pickedImage; // For web
+        } else {
+          _selectedImage = File(pickedImage.path); // For non-web platforms
+        }
       });
     }
   }
@@ -62,9 +67,15 @@ class _EditBookPageState extends State<EditBookPage> {
         String language = _languageController.text.trim();
         int length = int.parse(_lengthController.text);
 
-        // Handle image upload if a new image is selected
+        // Handle image upload for both web and non-web platforms
         String? imageUrl;
-        if (_selectedImage != null) {
+        if (kIsWeb && _webSelectedImage != null) {
+          final uploadTask = FirebaseStorage.instance
+              .ref("images/${DateTime.now()}.png")
+              .putData(await _webSelectedImage!.readAsBytes());
+          final taskSnapshot = await uploadTask;
+          imageUrl = await taskSnapshot.ref.getDownloadURL();
+        } else if (_selectedImage != null) {
           final uploadTask = FirebaseStorage.instance
               .ref("images/${DateTime.now()}.png")
               .putFile(_selectedImage!);
@@ -74,8 +85,11 @@ class _EditBookPageState extends State<EditBookPage> {
           imageUrl = widget.bookData['img']; // Keep the old image if no new one is selected
         }
 
-        // Update book data in Firestore
-        await FirebaseFirestore.instance.collection('books').doc(widget.bookData['id']).update({
+        // Update Firestore document
+        await FirebaseFirestore.instance
+            .collection('books')
+            .doc(widget.bookData['id'])
+            .update({
           "name": name,
           "price": price,
           "description": description,
@@ -83,20 +97,41 @@ class _EditBookPageState extends State<EditBookPage> {
           "publisher": publisher,
           "language": language,
           "length": length,
-          "img": imageUrl,
+          "imageurl": imageUrl, // Update the correct image URL field
           "updatedAt": FieldValue.serverTimestamp(),
         });
 
-        // Navigate back to the book list page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const BookListPage()),
-        );
+
+        // Delete the old image from Firebase Storage (if a new one is uploaded)
+        if ((_selectedImage != null || _webSelectedImage != null) &&
+            widget.bookData['img'] != null &&
+            widget.bookData['img'] != imageUrl) {
+          try {
+            await FirebaseStorage.instance
+                .refFromURL(widget.bookData['img'])
+                .delete();
+          } catch (e) {
+            print("Old image deletion error: $e");
+            // Optionally, you can handle the error or show a message.
+          }
+        }
+
+        // Ensure the widget is still mounted before navigating
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const BookListPage()),
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("Error: $e")));
+        }
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -145,9 +180,19 @@ class _EditBookPageState extends State<EditBookPage> {
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: _selectedImage != null
-                      ? Image.file(_selectedImage!, fit: BoxFit.cover)
-                      : (widget.bookData["img"] != null
+                  child: _selectedImage != null || _webSelectedImage != null
+                      ? (kIsWeb && _webSelectedImage != null
+                      ? Image.network(
+                    _webSelectedImage!.path,
+                    fit: BoxFit.cover,
+                  )
+                      : _selectedImage != null
+                      ? Image.file(
+                    _selectedImage!,
+                    fit: BoxFit.cover,
+                  )
+                      : null)
+                      : widget.bookData["img"] != null
                       ? Image.network(
                     widget.bookData["img"],
                     fit: BoxFit.cover,
@@ -159,7 +204,11 @@ class _EditBookPageState extends State<EditBookPage> {
                       );
                     },
                   )
-                      : const Icon(Icons.add_photo_alternate, color: Colors.grey, size: 60)),
+                      : const Icon(
+                    Icons.add_photo_alternate,
+                    color: Colors.grey,
+                    size: 60,
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
@@ -199,7 +248,6 @@ class _EditBookPageState extends State<EditBookPage> {
         prefixIcon: Icon(icon),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         filled: true,
-        fillColor: Colors.grey[100],
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {

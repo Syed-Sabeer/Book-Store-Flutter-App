@@ -25,13 +25,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Book Store App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: TColor.primary,
         fontFamily: 'SF Pro Text',
       ),
-      home: const MainTabView(), // Set MainTabView as the home
+      home: const DashboardPage(), // Set MainTabView as the home
     );
   }
 }
