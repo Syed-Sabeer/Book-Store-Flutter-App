@@ -1,8 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:book_grocer/admin/action/user_view.dart';
 import '../../common/color_extenstion.dart';
+
 class UsersListPage extends StatefulWidget {
   const UsersListPage({super.key});
 
@@ -12,44 +12,35 @@ class UsersListPage extends StatefulWidget {
 
 class _UsersListPageState extends State<UsersListPage> {
   String _searchQuery = '';
+  List<User?> _users = [];
 
-  final List<Map<String, dynamic>> _users = [
-    {
-      "id": "1",
-      "email": "john.doe@example.com",
-      "password": "password123",
-      "profilePic": "https://www.w3schools.com/w3images/avatar2.png",
-      "name": "John Doe",
-      "city": "New York",
-      "country": "USA",
-      "bio": "An avid reader and book lover.",
-      "orders": "15",
-      "reviews": "3",
-      "shippingAddress": "123 Main St, New York, NY 10001",
-      "ordersDetails": [],
-      "reviewsDetails": [],
-    },
-    {
-      "id": "2",
-      "email": "jane.smith@example.com",
-      "password": "password456",
-      "profilePic": "https://www.w3schools.com/w3images/avatar6.png",
-      "name": "Jane Smith",
-      "city": "Los Angeles",
-      "country": "USA",
-      "bio": "A bookworm with a passion for novels.",
-      "orders": "23",
-      "reviews": "5",
-      "shippingAddress": "456 Elm St, Los Angeles, CA 90001",
-      "ordersDetails": [],
-      "reviewsDetails": [],
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchUsers();
+  }
+
+  Future<void> _fetchUsers() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      setState(() {
+        _users = [currentUser]; // Only showing the current user for now
+      });
+    } else {
+      // Delay showing the error message until the build method is complete
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No users are currently logged in.")),
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final filteredUsers = _users.where((user) {
-      return user['email']!.toLowerCase().contains(_searchQuery.toLowerCase());
+      return user?.email?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false;
     }).toList();
 
     return Scaffold(
@@ -57,7 +48,7 @@ class _UsersListPageState extends State<UsersListPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: TColor.primary),
           onPressed: () {
-            Navigator.pop(context); // Go back to the book list
+            Navigator.pop(context); // Go back to the previous page
           },
         ),
         title: Text(
@@ -103,20 +94,17 @@ class _UsersListPageState extends State<UsersListPage> {
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundImage: CachedNetworkImageProvider(user['profilePic']),
+                        backgroundImage: CachedNetworkImageProvider(
+                          user?.photoURL ?? 'https://www.w3schools.com/w3images/avatar2.png',
+                        ),
                         radius: 30,
                         backgroundColor: Colors.grey[200],
                       ),
-                      title: Text(user['name']),
-                      subtitle: Text('Email: ${user['email']}'),
+                      title: Text(user?.displayName ?? 'Unknown User'),
+                      subtitle: Text('Email: ${user?.email ?? 'No email available'}'),
                       contentPadding: const EdgeInsets.all(16.0),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => UserViewPage(user: user),
-                          ),
-                        );
+                        // Handle tapping on a user here
                       },
                     ),
                   );

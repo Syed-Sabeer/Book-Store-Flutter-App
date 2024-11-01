@@ -11,7 +11,7 @@ class CompletedOrdersPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Pending Orders',
+          'Completed Orders',
           style: TextStyle(
             color: TColor.primary,
             fontWeight: FontWeight.w600,
@@ -35,7 +35,7 @@ class CompletedOrdersPage extends StatelessWidget {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No pending orders found'));
+            return const Center(child: Text('No completed orders found'));
           }
 
           final List<DocumentSnapshot> orderDocs = snapshot.data!.docs;
@@ -66,7 +66,7 @@ class CompletedOrdersPage extends StatelessWidget {
                 elevation: 8,
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(16),
-                  leading: const Icon(Icons.local_shipping, color: Colors.orange, size: 36),
+                  leading: const Icon(Icons.check_circle, color: Colors.green, size: 36),
                   title: Text('Order ID: ${orderDocs[index].id}',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   subtitle: Column(

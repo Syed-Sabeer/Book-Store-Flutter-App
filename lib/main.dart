@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         primaryColor: TColor.primary,
         fontFamily: 'SF Pro Text',
       ),
-      home: const DashboardPage(), // Set MainTabView as the home
+      home: const MainTabView(), // Set MainTabView as the home
     );
   }
 }

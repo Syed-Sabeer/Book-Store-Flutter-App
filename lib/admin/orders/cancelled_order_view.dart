@@ -11,7 +11,7 @@ class CancelledOrdersPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Pending Orders',
+          'Cancelled Orders',
           style: TextStyle(
             color: TColor.primary,
             fontWeight: FontWeight.w600,
