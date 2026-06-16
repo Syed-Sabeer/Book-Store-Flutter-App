@@ -168,8 +168,6 @@ Admins can manage the store by adding, editing, and deleting books, managing boo
 
 ## App Screens
 
-Recommended screenshots to add:
-
 
 ![Onboarding](screenshots/onboarding.png)
 
