@@ -170,21 +170,9 @@ Admins can manage the store by adding, editing, and deleting books, managing boo
 
 Recommended screenshots to add:
 
-md
+
 ![Onboarding](screenshots/onboarding.png)
-![Login](screenshots/login.png)
-![Home](screenshots/home.png)
-![Book Details](screenshots/book-details.png)
-![Search](screenshots/search.png)
-![Genre Filter](screenshots/genre-filter.png)
-![Cart](screenshots/cart.png)
-![Checkout](screenshots/checkout.png)
-![Book Reading](screenshots/book-reading.png)
-![Wishlist](screenshots/wishlist.png)
-![Admin Dashboard](screenshots/admin-dashboard.png)
-![Add Book](screenshots/add-book.png)
-![Manage Books](screenshots/manage-books.png)
-![Orders](screenshots/orders.png)
+
 
 
 ---
