@@ -170,7 +170,7 @@ Admins can manage the store by adding, editing, and deleting books, managing boo
 
 Recommended screenshots to add:
 
-```md
+md
 ![Onboarding](screenshots/onboarding.png)
 ![Login](screenshots/login.png)
 ![Home](screenshots/home.png)
@@ -185,7 +185,7 @@ Recommended screenshots to add:
 ![Add Book](screenshots/add-book.png)
 ![Manage Books](screenshots/manage-books.png)
 ![Orders](screenshots/orders.png)
-```
+
 
 ---
 
